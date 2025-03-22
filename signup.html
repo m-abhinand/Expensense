@@ -1,0 +1,307 @@
+<!DOCTYPE html>
+<html lang="en" data-theme="dark">
+<head>
+    <meta charset="UTF-8">
+    <meta name="viewport" content="width=device-width, initial-scale=1.0">
+    <title>Expense Tracker - Sign Up</title>
+    <link rel="stylesheet" href="./css/main.css">
+    <link rel="stylesheet" href="./css/auth.css">
+    <link href="https://fonts.googleapis.com/css2?family=DM+Sans:ital,opsz,wght@0,9..40,100..1000;1,9..40,100..1000&family=Outfit:wght@100..900&display=swap" rel="stylesheet">
+    <style>
+        :root {
+            --primary-color: #6366f1;
+            --primary-hover: #4f46e5;
+            --secondary-color: #10b981;
+            --accent-color: #f59e0b;
+            --card-bg-dark: #333333;
+            --text-dark: #f3f4f6;
+            --text-secondary-dark: #9ca3af;
+            --input-border-dark: #555555;
+            
+            /* Set default theme variables to dark mode */
+            --background: #222222;
+            --card-bg: #333333;
+            --text: #f3f4f6;
+            --text-secondary: #9ca3af;
+            --input-border: #555555;
+        }
+        
+        body {
+            /* Keep the dark gradient */
+            background: linear-gradient(135deg, #1f2141 0%, #2a2a50 40%, #2b2b4a 60%, #252550 100%);
+            color: var(--text);
+            font-family: 'DM Sans', sans-serif;
+            min-height: 100vh;
+            margin: 0;
+            background-attachment: fixed;
+        }
+        
+        .container {
+            display: flex;
+            justify-content: center;
+            align-items: center;
+            min-height: 100vh;
+            padding: 1rem;
+            max-width: 1200px;
+            margin: 0 auto;
+        }
+        
+        .split-layout {
+            display: flex;
+            background: var(--card-bg);
+            border-radius: 12px;
+            box-shadow: 0 10px 25px rgba(0, 0, 0, 0.1);
+            width: 100%;
+            overflow: hidden;
+        }
+        
+        .description-side {
+            flex: 1;
+            background: rgba(99, 102, 241, 0.7);  /* Semi-transparent background */
+            backdrop-filter: blur(10px);  /* Frosted glass effect */
+            -webkit-backdrop-filter: blur(10px);  /* For Safari support */
+            color: white;
+            padding: 2rem;
+            display: flex;
+            flex-direction: column;
+            justify-content: center;
+            position: relative;
+            overflow: hidden;
+            border: 1px solid rgba(255, 255, 255, 0.1);
+            box-shadow: 0 4px 30px rgba(0, 0, 0, 0.1);
+        }
+        
+        /* Add background elements for more depth */
+        .description-side::before {
+            content: "";
+            position: absolute;
+            top: 0;
+            left: 0;
+            right: 0;
+            bottom: 0;
+            background: 
+                radial-gradient(circle at 20% 20%, rgba(255, 255, 255, 0.15) 0%, transparent 40%),
+                radial-gradient(circle at 80% 80%, rgba(255, 255, 255, 0.1) 0%, transparent 30%);
+            z-index: -1;
+        }
+        
+        /* Enhance text readability */
+        .description-side h1,
+        .description-side p,
+        .description-side .feature-list {
+            position: relative;
+            z-index: 1;
+            text-shadow: 0 1px 3px rgba(0, 0, 0, 0.15);
+        }
+        
+        .description-side h1 {
+            color: white;
+            font-size: 2.2rem;
+            margin-bottom: 1rem;
+        }
+        
+        .description-side p {
+            margin-bottom: 1.2rem;
+            line-height: 1.6;
+            font-size: 1.05rem;
+            opacity: 0.9;
+        }
+        
+        .feature-list {
+            list-style: none;
+            padding: 0;
+            margin: 1.5rem 0;
+        }
+        
+        .feature-list li {
+            margin-bottom: 0.8rem;
+            display: flex;
+            align-items: center;
+        }
+        
+        .feature-list li:before {
+            content: "✓";
+            margin-right: 0.7rem;
+            color: var(--accent-color);
+            font-weight: bold;
+        }
+        
+        .auth-side {
+            flex: 1;
+            padding: 2rem;
+            background: var(--card-bg);
+        }
+        
+        .auth-card {
+            background: transparent;
+            box-shadow: none;
+            width: 100%;
+            max-width: 100%;
+            padding: 0;
+        }
+        
+        h1 {
+            color: var(--primary-color);
+            margin-bottom: 0.3rem;
+            font-size: 1.8rem;
+            font-family: 'Outfit', sans-serif;
+        }
+        
+        h2 {
+            color: var(--text);
+            margin-bottom: 1rem;
+            font-weight: 500;
+            font-family: 'Outfit', sans-serif;
+        }
+        
+        .form-group {
+            margin-bottom: 0.8rem;
+        }
+        
+        label {
+            display: block;
+            margin-bottom: 0.3rem;
+            color: var(--text);
+            font-weight: 500;
+        }
+        
+        input {
+            width: 100%;
+            padding: 0.6rem;
+            border: 1px solid var(--input-border);
+            border-radius: 12px; /* Increased border-radius for more rounded corners */
+            background: var(--card-bg);
+            color: var(--text);
+            transition: all 0.2s ease;
+        }
+        
+        input:focus {
+            outline: none;
+            border-color: var(--primary-color);
+            box-shadow: 0 0 0 3px rgba(99, 102, 241, 0.2);
+        }
+        
+        .btn {
+            padding: 0.6rem 1rem;
+            border-radius: 8px;
+            border: none;
+            font-weight: 600;
+            cursor: pointer;
+            transition: all 0.2s ease;
+            width: 100%;
+            margin-top: 0.7rem;
+        }
+        
+        .btn-primary {
+            background: var(--primary-color);
+            color: white;
+        }
+        
+        .btn-primary:hover {
+            background: var(--primary-hover);
+            transform: translateY(-1px);
+        }
+        
+        .error-message {
+            color: #ef4444;
+            font-size: 0.8rem;
+            margin-top: 0.15rem;
+        }
+        
+        .auth-switch {
+            text-align: center;
+            margin-top: 1rem;
+            color: var(--text-secondary);
+        }
+        
+        .auth-switch a {
+            color: var(--primary-color);
+            text-decoration: none;
+            font-weight: 600;
+            transition: color 0.2s;
+        }
+        
+        .auth-switch a:hover {
+            color: var (--primary-hover);
+            text-decoration: underline;
+        }
+        
+        /* Remove theme toggle related styles */
+        .theme-toggle-container {
+            display: none;
+        }
+        
+        @media (max-width: 768px) {
+            .split-layout {
+                flex-direction: column;
+            }
+            
+            .description-side {
+                padding: 1.5rem;
+            }
+            
+            .description-side h1 {
+                font-size: 1.8rem;
+            }
+            
+            .auth-side {
+                padding: 1.5rem;
+            }
+        }
+    </style>
+</head>
+<body>
+    <!-- Removed theme toggle button -->
+    <div class="container">
+        <div class="split-layout">
+            <div class="description-side">
+                <h1>Expense Tracker</h1>
+                <p>Take control of your finances with our modern expense tracking application. Easily monitor your spending, create budgets, and achieve your financial goals.</p>
+                
+                <ul class="feature-list">
+                    <li>Track expenses and income in real-time</li>
+                    <li>Create custom categories and budgets</li>
+                    <li>Generate detailed financial reports</li>
+                    <li>Secure cloud storage for your data</li>
+                    <li>Access from any device, anywhere</li>
+                </ul>
+                
+                <p>Join thousands of users who have already improved their financial habits with our easy-to-use platform.</p>
+            </div>
+            
+            <div class="auth-side">
+                <div class="auth-card">
+                    <h2>Sign Up</h2>
+                    <form id="signupForm">
+                        <div class="form-group">
+                            <label for="name">Full Name</label>
+                            <input type="text" id="name" name="name" required>
+                            <span class="error-message" id="name-error"></span>
+                        </div>
+                        <div class="form-group">
+                            <label for="email">Email</label>
+                            <input type="email" id="email" name="email" required>
+                            <span class="error-message" id="email-error"></span>
+                        </div>
+                        <div class="form-group">
+                            <label for="password">Password</label>
+                            <input type="password" id="password" name="password" required>
+                            <span class="error-message" id="password-error"></span>
+                        </div>
+                        <div class="form-group">
+                            <label for="confirm-password">Confirm Password</label>
+                            <input type="password" id="confirm-password" name="confirm-password" required>
+                            <span class="error-message" id="confirm-password-error"></span>
+                        </div>
+                        <button type="submit" class="btn btn-primary">Sign Up</button>
+                    </form>
+                    <p class="auth-switch">Already have an account? <a href="index.html">Login</a></p>
+                </div>
+            </div>
+        </div>
+    </div>
+    <script src="./js/utils.js"></script>
+    <script src="./js/validation.js"></script>
+    <script src="./js/auth.js"></script>
+</body>
+</html>
