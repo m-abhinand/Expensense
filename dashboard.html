@@ -1,0 +1,444 @@
+<!DOCTYPE html>
+<html lang="en" data-theme="light">
+<head>
+    <meta charset="UTF-8">
+    <meta name="viewport" content="width=device-width, initial-scale=1.0">
+    <title>Expense Tracker - Dashboard</title>
+    <link rel="stylesheet" href="./css/main.css">
+    <link rel="stylesheet" href="./css/dashboard.css">
+    <!-- Chart.js library -->
+    <script src="https://cdn.jsdelivr.net/npm/chart.js"></script>
+    <!-- jsPDF library for PDF export -->
+    <script src="https://cdnjs.cloudflare.com/ajax/libs/jspdf/2.5.1/jspdf.umd.min.js"></script>
+    <script src="https://cdnjs.cloudflare.com/ajax/libs/jspdf-autotable/3.5.28/jspdf.plugin.autotable.min.js"></script>
+    <link rel="preconnect" href="https://fonts.googleapis.com">
+    <link rel="preconnect" href="https://fonts.gstatic.com" crossorigin>
+    <link href="https://fonts.googleapis.com/css2?family=DM+Sans:ital,opsz,wght@0,9..40,100..1000;1,9..40,100..1000&family=Outfit:wght@100..900&display=swap" rel="stylesheet">
+</head>
+<body>
+    <header>
+        <div class="container">
+            <h1>Expensense</h1>
+            <div class="user-info">
+                <button id="theme-toggle" class="theme-toggle" title="Toggle Dark Mode">
+                    <span id="theme-icon">🌙</span>
+                </button>
+                <span id="user-name">User</span>
+                <div class="user-actions">
+                    <div class="dropdown">
+                        <button class="btn btn-outline btn-sm dropdown-toggle">
+                            <span class="icon">⚙️</span> Options
+                        </button>
+                        <div class="dropdown-menu">
+                            <button id="export-csv" class="dropdown-item">
+                                <span class="icon">📄</span> Export to CSV
+                            </button>
+                            <button id="export-pdf" class="dropdown-item">
+                                <span class="icon">📑</span> Export to PDF
+                            </button>
+                            <div class="dropdown-divider"></div>
+                            <button id="reset-data" class="dropdown-item danger">
+                                <span class="icon">🗑️</span> Reset Data
+                            </button>
+                        </div>
+                    </div>
+                    <button id="logout-btn" class="btn btn-outline">Logout</button>
+                </div>
+            </div>
+        </div>
+    </header>
+    <main class="container">
+        <!-- Summary Section -->
+        <section class="summary-section">
+            <div class="summary-card total-expenses-card">
+                <h3>Total Expenses</h3>
+                <div class="summary-amount" id="total-expenses">$0.00</div>
+            </div>
+            <div class="summary-card">
+                <h3>This Month</h3>
+                <div class="summary-amount" id="month-expenses">$0.00</div>
+            </div>
+            <div class="summary-card">
+                <h3>This Week</h3>
+                <div class="summary-amount" id="week-expenses">$0.00</div>
+            </div>
+            <div class="summary-card">
+                <h3>Average Per Day</h3>
+                <div class="summary-amount" id="avg-expenses">$0.00</div>
+            </div>
+        </section>
+
+        <!-- Budget Overview Section -->
+        <section class="budget-overview">
+            <div class="budget-card monthly">
+                <div class="budget-header">
+                    <h3>Monthly Budget</h3>
+                    <button class="btn-icon set-budget" data-type="monthly" title="Set Monthly Budget">⚙️</button>
+                </div>
+                <div class="budget-content">
+                    <div class="budget-amount">
+                        <span id="monthly-budget-amount">Not Set</span>
+                    </div>
+                    <div class="budget-progress-container">
+                        <div class="budget-progress-bar" id="monthly-budget-bar"></div>
+                    </div>
+                    <div class="budget-status">
+                        <span id="monthly-spent">$0.00</span> / <span id="monthly-budget">$0.00</span>
+                        (<span id="monthly-percentage">0%</span>)
+                    </div>
+                </div>
+            </div>
+            <div class="budget-card weekly">
+                <div class="budget-header">
+                    <h3>Weekly Budget</h3>
+                    <button class="btn-icon set-budget" data-type="weekly" title="Set Weekly Budget">⚙️</button>
+                </div>
+                <div class="budget-content">
+                    <div class="budget-amount">
+                        <span id="weekly-budget-amount">Not Set</span>
+                    </div>
+                    <div class="budget-progress-container">
+                        <div class="budget-progress-bar" id="weekly-budget-bar"></div>
+                    </div>
+                    <div class="budget-status">
+                        <span id="weekly-spent">$0.00</span> / <span id="weekly-budget">$0.00</span>
+                        (<span id="weekly-percentage">0%</span>)
+                    </div>
+                </div>
+            </div>
+        </section>
+
+        <!-- Charts Section -->
+        <section class="charts-section" style="display: flex; gap: 20px;">
+            <div class="chart-container card" style="flex: 1;">
+                <h2>Expense Breakdown by Category</h2>
+                <div class="chart-wrapper">
+                    <canvas id="category-chart"></canvas>
+                </div>
+            </div>
+            <div class="chart-container card" style="flex: 1;">
+                <h2>Monthly Expense Trends</h2>
+                <div class="chart-wrapper">
+                    <canvas id="trend-chart"></canvas>
+                </div>
+            </div>
+        </section>
+
+        <div class="dashboard-layout">
+            <!-- Expense List Section -->
+            <section class="expense-list-container card">
+                <div class="expense-list-header">
+                    <h2>Your Expenses</h2>
+                    <div class="expense-controls">
+                        <div class="search-box">
+                            <input type="text" id="expense-search" placeholder="Search expenses...">
+                            <button type="button" class="search-clear" id="clear-search">×</button>
+                        </div>
+                        <button id="toggle-filters" class="btn btn-outline btn-sm">
+                            <span id="filter-icon">🔍</span> Filters
+                        </button>
+                    </div>
+                </div>
+                
+                <!-- Advanced Filters Section -->
+                <div class="advanced-filters" id="advanced-filters">
+                    <div class="filter-row">
+                        <div class="filter-group">
+                            <label for="filter-date-range">Date Range</label>
+                            <select id="filter-date-range">
+                                <option value="all">All Time</option>
+                                <option value="month">This Month</option>
+                                <option value="week">This Week</option>
+                                <option value="day">Today</option>
+                                <option value="custom">Custom Range</option>
+                            </select>
+                        </div>
+                        <div class="filter-group custom-date-range" id="custom-date-container">
+                            <div class="date-range-inputs">
+                                <div class="date-input">
+                                    <label for="filter-date-start">From</label>
+                                    <input type="date" id="filter-date-start">
+                                </div>
+                                <div class="date-input">
+                                    <label for="filter-date-end">To</label>
+                                    <input type="date" id="filter-date-end">
+                                </div>
+                            </div>
+                        </div>
+                    </div>
+                    <div class="filter-row">
+                        <div class="filter-group">
+                            <label for="filter-category">Category</label>
+                            <select id="filter-category">
+                                <option value="all">All Categories</option>
+                                <option value="food">Food & Dining</option>
+                                <option value="transportation">Transportation</option>
+                                <option value="housing">Housing & Rent</option>
+                                <option value="utilities">Utilities</option>
+                                <option value="entertainment">Entertainment</option>
+                                <option value="shopping">Shopping</option>
+                                <option value="health">Health & Medical</option>
+                                <option value="travel">Travel</option>
+                                <option value="education">Education</option>
+                                <option value="other">Other</option>
+                            </select>
+                        </div>
+                        <div class="filter-group">
+                            <label>Amount Range</label>
+                            <div class="amount-range-inputs">
+                                <div class="amount-input">
+                                    <label for="filter-amount-min">Min</label>
+                                    <input type="number" id="filter-amount-min" placeholder="0" step="0.01" min="0">
+                                </div>
+                                <div class="amount-input">
+                                    <label for="filter-amount-max">Max</label>
+                                    <input type="number" id="filter-amount-max" placeholder="∞" step="0.01" min="0">
+                                </div>
+                            </div>
+                        </div>
+                    </div>
+                    <div class="filter-actions">
+                        <button id="apply-filters" class="btn btn-primary btn-sm">Apply Filters</button>
+                        <button id="reset-filters" class="btn btn-outline btn-sm">Reset</button>
+                    </div>
+                </div>
+                
+                <!-- Active Filters Display -->
+                <div class="active-filters" id="active-filters">
+                    <!-- Will be populated dynamically -->
+                </div>
+
+                <div class="filter-results-summary" id="filter-results-summary">
+                    <!-- Will show count of filtered results -->
+                </div>
+                
+                <div class="expense-list" id="expense-list">
+                    <!-- Expenses will be added dynamically here -->
+                    <div class="empty-state" id="empty-state">
+                        <p>No expenses yet. Add your first expense to get started!</p>
+                    </div>
+                    <!-- No Results Message -->
+                    <div class="no-results" id="no-results" style="display: none;">
+                        <p>No expenses match your search criteria.</p>
+                        <button id="clear-all-filters" class="btn btn-outline btn-sm">Clear All Filters</button>
+                    </div>
+                </div>
+            </section>
+        </div>
+
+        <!-- Category Breakdown Section -->
+        <section class="category-breakdown card">
+            <h2>Category-wise Breakdown</h2>
+            <div class="categories-container" id="categories-breakdown">
+                <!-- Will be populated dynamically -->
+            </div>
+        </section>
+    </main>
+
+    <!-- Add floating action button for new expense -->
+    <button id="add-expense-fab" class="fab" title="Add New Expense">
+        <span class="fab-icon">+</span>
+    </button>
+
+    <!-- Add New Expense Modal -->
+    <div class="modal" id="add-expense-modal">
+        <div class="modal-content expense-modal-content">
+            <div class="modal-header">
+                <h3>Add New Expense</h3>
+                <button class="close-modal">&times;</button>
+            </div>
+            <form id="expense-form">
+                <div class="form-group">
+                    <label for="expense-amount">Amount</label>
+                    <div class="input-with-icon">
+                        <span class="input-icon">$</span>
+                        <input type="number" id="expense-amount" name="amount" step="0.01" min="0.01" required>
+                    </div>
+                    <span class="error-message" id="expense-amount-error"></span>
+                </div>
+                
+                <div class="form-group">
+                    <label for="expense-category">Category</label>
+                    <div class="select-wrapper">
+                        <select id="expense-category" name="category" required>
+                            <option value="" disabled selected>Select a category</option>
+                            <option value="food">Food & Dining</option>
+                            <option value="transportation">Transportation</option>
+                            <option value="housing">Housing & Rent</option>
+                            <option value="utilities">Utilities</option>
+                            <option value="entertainment">Entertainment</option>
+                            <option value="shopping">Shopping</option>
+                            <option value="health">Health & Medical</option>
+                            <option value="travel">Travel</option>
+                            <option value="education">Education</option>
+                            <option value="other">Other</option>
+                        </select>
+                    </div>
+                    <span class="error-message" id="expense-category-error"></span>
+                </div>
+                
+                <div class="form-group">
+                    <label for="expense-date">Date</label>
+                    <div class="date-wrapper">
+                        <input type="date" id="expense-date" name="date" required>
+                    </div>
+                    <span class="error-message" id="expense-date-error"></span>
+                </div>
+                
+                <div class="form-group">
+                    <label for="expense-notes">Notes (Optional)</label>
+                    <textarea id="expense-notes" name="notes" rows="3" placeholder="Add any details about this expense..."></textarea>
+                </div>
+                
+                <div class="form-actions">
+                    <button type="submit" class="btn btn-primary">Add Expense</button>
+                    <button type="reset" class="btn btn-outline">Clear</button>
+                </div>
+            </form>
+        </div>
+    </div>
+
+    <!-- Edit Expense Modal -->
+    <div class="modal" id="edit-expense-modal">
+        <div class="modal-content expense-modal-content">
+            <div class="modal-header">
+                <h3>Edit Expense</h3>
+                <button class="close-modal">&times;</button>
+            </div>
+            <form id="edit-expense-form">
+                <input type="hidden" id="edit-expense-id">
+                <div class="form-group">
+                    <label for="edit-expense-amount">Amount</label>
+                    <div class="input-with-icon">
+                        <span class="input-icon">$</span>
+                        <input type="number" id="edit-expense-amount" name="amount" step="0.01" min="0.01" required>
+                    </div>
+                    <span class="error-message" id="edit-expense-amount-error"></span>
+                </div>
+                
+                <div class="form-group">
+                    <label for="edit-expense-category">Category</label>
+                    <div class="select-wrapper">
+                        <select id="edit-expense-category" name="category" required>
+                            <option value="food">Food & Dining</option>
+                            <option value="transportation">Transportation</option>
+                            <option value="housing">Housing & Rent</option>
+                            <option value="utilities">Utilities</option>
+                            <option value="entertainment">Entertainment</option>
+                            <option value="shopping">Shopping</option>
+                            <option value="health">Health & Medical</option>
+                            <option value="travel">Travel</option>
+                            <option value="education">Education</option>
+                            <option value="other">Other</option>
+                        </select>
+                    </div>
+                </div>
+                
+                <div class="form-group">
+                    <label for="edit-expense-date">Date</label>
+                    <div class="date-wrapper">
+                        <input type="date" id="edit-expense-date" name="date" required>
+                    </div>
+                </div>
+                
+                <div class="form-group">
+                    <label for="edit-expense-notes">Notes (Optional)</label>
+                    <textarea id="edit-expense-notes" name="notes" rows="3"></textarea>
+                </div>
+                
+                <div class="form-actions">
+                    <button type="submit" class="btn btn-primary">Save Changes</button>
+                    <button type="button" class="btn btn-outline cancel-edit">Cancel</button>
+                </div>
+            </form>
+        </div>
+    </div>
+
+    <!-- Delete Confirmation Modal -->
+    <div class="modal" id="delete-expense-modal">
+        <div class="modal-content">
+            <div class="modal-header">
+                <h3>Delete Expense</h3>
+                <button class="close-modal">&times;</button>
+            </div>
+            <div class="modal-body">
+                <p>Are you sure you want to delete this expense? This action cannot be undone.</p>
+            </div>
+            <div class="modal-footer">
+                <button id="confirm-delete" class="btn btn-danger">Delete</button>
+                <button class="btn btn-outline cancel-delete">Cancel</button>
+            </div>
+        </div>
+    </div>
+
+    <!-- Budget Setting Modal -->
+    <div class="modal" id="budget-modal">
+        <div class="modal-content">
+            <div class="modal-header">
+                <h3>Set <span id="budget-type-title">Monthly</span> Budget</h3>
+                <button class="close-modal">&times;</button>
+            </div>
+            <form id="budget-form">
+                <input type="hidden" id="budget-type" value="monthly">
+                
+                <div class="budget-type-selector">
+                    <div class="budget-type-option active" id="budget-type-monthly">Monthly</div>
+                    <div class="budget-type-option" id="budget-type-weekly">Weekly</div>
+                </div>
+                
+                <div class="budget-info" id="budget-info">
+                    <p id="budget-info-text">Set your total budget for the current month. This helps track your monthly spending patterns.</p>
+                </div>
+                
+                <div class="form-group">
+                    <label for="budget-amount">Enter Budget Amount</label>
+                    <div class="input-with-icon">
+                        <span class="input-icon">$</span>
+                        <input type="number" id="budget-amount" name="amount" step="0.01" min="0.01" placeholder="0.00" required>
+                    </div>
+                    <span class="error-message" id="budget-amount-error"></span>
+                </div>
+                
+                <div class="current-spending">
+                    <p>You've spent <span class="amount" id="current-spending-amount">$0.00</span> so far.</p>
+                </div>
+                
+                <div class="form-actions">
+                    <button type="button" class="btn btn-outline cancel-budget">Cancel</button>
+                    <button type="submit" class="btn btn-primary">Save Budget</button>
+                </div>
+            </form>
+        </div>
+    </div>
+
+    <!-- Reset Confirmation Modal -->
+    <div class="modal" id="reset-confirmation-modal">
+        <div class="modal-content">
+            <div class="modal-header">
+                <h3>Reset Expense Data</h3>
+                <button class="close-modal">&times;</button>
+            </div>
+            <div class="modal-body">
+                <div class="warning-icon">⚠️</div>
+                <p>Are you sure you want to reset all your expense data? This will delete all your expenses, budgets, and settings.</p>
+                <p class="warning-text">This action cannot be undone!</p>
+            </div>
+            <div class="modal-footer">
+                <button id="confirm-reset" class="btn btn-danger">Yes, Reset All Data</button>
+                <button class="btn btn-outline cancel-reset">Cancel</button>
+            </div>
+        </div>
+    </div>
+
+    <!-- Backdrop for modals -->
+    <div class="modal-backdrop" id="modal-backdrop"></div>
+
+    <script src="./js/utils.js"></script>
+    <script src="./js/expenses.js"></script>
+    <script src="./js/budget.js"></script>
+    <script src="./js/dashboard.js"></script>
+    <script src="./js/dashboard-charts.js"></script>
+    <script src="./js/export.js"></script>
+    <script src="./js/theme.js"></script>
+</body>
+</html>

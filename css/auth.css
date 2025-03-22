@@ -1,0 +1,89 @@
+.container {
+    display: flex;
+    justify-content: center;
+    align-items: center;
+    min-height: 100vh;
+    padding: var(--space-lg);
+}
+
+.auth-card {
+    background-color: var(--bg-card);
+    border-radius: var(--border-radius-lg);
+    box-shadow: var(--box-shadow);
+    padding: var(--space-xl);
+    width: 100%;
+    max-width: 400px;
+    text-align: center;
+    transition: background-color var(--transition-speed) ease,
+                box-shadow var(--transition-speed) ease;
+}
+
+.auth-card h1 {
+    color: var(--primary-color);
+    margin-bottom: var(--space-sm);
+    font-size: var(--font-xxl);
+}
+
+.auth-card h2 {
+    margin-bottom: var(--space-xl);
+    font-weight: 500;
+    color: var(--text-color);
+    font-size: var(--font-lg);
+    transition: color var(--transition-speed) ease;
+}
+
+.form-group {
+    margin-bottom: var(--space-lg);
+    text-align: left;
+}
+
+.form-group label {
+    display: block;
+    margin-bottom: var(--space-sm);
+    font-weight: 500;
+    color: var(--text-color);
+    transition: color var(--transition-speed) ease;
+}
+
+.form-group input {
+    width: 100%;
+    padding: var(--space-md);
+    border: 1px solid var(--border-color);
+    border-radius: var(--border-radius-sm);
+    font-size: var(--font-md);
+    background-color: var(--bg-card);
+    color: var(--text-color);
+    transition: border var(--transition-speed) ease,
+                background-color var(--transition-speed) ease,
+                color var(--transition-speed) ease;
+}
+
+.form-group input:focus {
+    outline: none;
+    border-color: var(--primary-color);
+    box-shadow: 0 0 0 2px rgba(52, 152, 219, 0.2);
+}
+
+.form-group input.error {
+    border-color: var(--danger-color);
+}
+
+.btn {
+    width: 100%;
+    padding: var(--space-md);
+    margin-top: var(--space-sm);
+}
+
+.auth-switch {
+    margin-top: var(--space-lg);
+    font-size: var(--font-sm);
+    color: var(--text-secondary);
+    transition: color var(--transition-speed) ease;
+}
+
+/* Add theme toggle for auth pages */
+.theme-toggle-container {
+    position: absolute;
+    top: var(--space-md);
+    right: var(--space-md);
+}
