@@ -60,6 +60,9 @@ document.addEventListener('DOMContentLoaded', function() {
     
     // Reorganize dashboard layout to place expenses box beside budgets
     reorganizeDashboardLayout();
+    
+    // Initialize historical expense view functionality
+    initHistoricalExpenseView();
 });
 
 // Initialize the expense form
@@ -2146,3 +2149,289 @@ document.addEventListener('budgetsUpdated', function() {
     updateBudgetInsights('monthly');
     updateBudgetInsights('weekly');
 });
+
+// Initialize historical expense view 
+function initHistoricalExpenseView() {
+    const monthSummaryCard = document.getElementById('month-summary-card');
+    const weekSummaryCard = document.getElementById('week-summary-card');
+    
+    if (monthSummaryCard) {
+        monthSummaryCard.addEventListener('click', function() {
+            showHistoricalExpenses('monthly');
+        });
+        // Add visual indication that the card is clickable
+        monthSummaryCard.classList.add('clickable');
+    }
+    
+    if (weekSummaryCard) {
+        weekSummaryCard.addEventListener('click', function() {
+            showHistoricalExpenses('weekly');
+        });
+        // Add visual indication that the card is clickable
+        weekSummaryCard.classList.add('clickable');
+    }
+}
+
+// Show historical expenses by period type (weekly/monthly)
+function showHistoricalExpenses(periodType) {
+    const modal = document.getElementById('historical-expenses-modal');
+    const modalBackdrop = document.getElementById('modal-backdrop');
+    const titleElement = document.getElementById('historical-expenses-title');
+    const periodsListElement = document.getElementById('historical-periods-list');
+    
+    // Clear previous content
+    periodsListElement.innerHTML = '';
+    
+    // Set the title based on period type
+    titleElement.textContent = periodType === 'monthly' ? 'Monthly Expenses History' : 'Weekly Expenses History';
+    
+    // Get all expenses
+    const expenses = expenseManager.getAllExpenses();
+    if (!expenses.length) {
+        periodsListElement.innerHTML = '<div class="empty-state">No expense data available.</div>';
+        openModal();
+        return;
+    }
+    
+    // Group expenses by period
+    const periodExpenses = groupExpensesByPeriod(expenses, periodType);
+    
+    // Sort periods in descending order (newest first)
+    const sortedPeriods = Object.keys(periodExpenses).sort((a, b) => {
+        return new Date(b) - new Date(a);
+    });
+    
+    // Generate HTML for each period
+    sortedPeriods.forEach(periodKey => {
+        const periodData = periodExpenses[periodKey];
+        const totalAmount = periodData.expenses.reduce((sum, exp) => sum + parseFloat(exp.amount), 0);
+        
+        const periodElement = document.createElement('div');
+        periodElement.className = 'historical-period-item';
+        
+        // Format period label
+        let periodLabel;
+        if (periodType === 'monthly') {
+            const date = new Date(periodKey);
+            periodLabel = date.toLocaleDateString(undefined, { year: 'numeric', month: 'long' });
+        } else {
+            periodLabel = `Week of ${formatDate(new Date(periodKey))}`;
+        }
+        
+        // Create period header with toggle functionality
+        const periodHeader = document.createElement('div');
+        periodHeader.className = 'historical-period-header';
+        periodHeader.innerHTML = `
+            <div class="period-info">
+                <span class="period-label">${periodLabel}</span>
+                <span class="period-amount">${formatCurrency(totalAmount)}</span>
+            </div>
+            <span class="toggle-icon">▼</span>
+        `;
+        
+        // Create container for period expenses
+        const expensesContainer = document.createElement('div');
+        expensesContainer.className = 'historical-period-expenses';
+        expensesContainer.style.maxHeight = '0';
+        expensesContainer.style.opacity = '0';
+        expensesContainer.style.overflow = 'hidden';
+        
+        // Add expenses to container
+        if (periodData.expenses.length > 0) {
+            periodData.expenses.forEach(expense => {
+                const expenseItem = document.createElement('div');
+                expenseItem.className = 'historical-expense-item';
+                expenseItem.innerHTML = `
+                    <div class="expense-item-main">
+                        <div class="expense-header">
+                            <span class="category-badge category-${expense.category}">${getCategoryName(expense.category)}</span>
+                            <span class="expense-amount">${formatCurrency(expense.amount)}</span>
+                        </div>
+                        <div class="expense-date">${formatDate(new Date(expense.date))}</div>
+                        ${expense.notes ? `<div class="expense-notes">${expense.notes}</div>` : ''}
+                    </div>
+                `;
+                expensesContainer.appendChild(expenseItem);
+            });
+        } else {
+            expensesContainer.innerHTML = '<div class="empty-state">No expenses in this period.</div>';
+        }
+        
+        // Toggle expense visibility when header is clicked with smooth transition
+        periodHeader.addEventListener('click', function() {
+            const isVisible = expensesContainer.classList.contains('expanded');
+            
+            if (isVisible) {
+                // Collapse section - first set exact height before transitioning to 0
+                expensesContainer.style.maxHeight = expensesContainer.scrollHeight + 'px';
+                // Force reflow to ensure the browser registers the maxHeight
+                expensesContainer.offsetHeight;
+                // Now set to 0 to trigger the animation
+                expensesContainer.style.maxHeight = '0';
+                expensesContainer.style.opacity = '0';
+                expensesContainer.classList.remove('expanded');
+                periodHeader.querySelector('.toggle-icon').textContent = '▼';
+            } else {
+                // Expand section
+                expensesContainer.classList.add('expanded');
+                expensesContainer.style.maxHeight = expensesContainer.scrollHeight + 'px';
+                expensesContainer.style.opacity = '1';
+                periodHeader.querySelector('.toggle-icon').textContent = '▲';
+                
+                // Adjust maxHeight after transition completes to allow for content growth
+                setTimeout(() => {
+                    if (expensesContainer.classList.contains('expanded')) {
+                        expensesContainer.style.maxHeight = 'none';
+                    }
+                }, 300); // Should match transition duration
+            }
+        });
+        
+        // Add elements to period container
+        periodElement.appendChild(periodHeader);
+        periodElement.appendChild(expensesContainer);
+        periodsListElement.appendChild(periodElement);
+    });
+    
+    // Add styles for the historical expenses view
+    addHistoricalExpensesStyles();
+    
+    // Open the modal
+    openModal();
+    
+    function openModal() {
+        modal.classList.add('active');
+        modalBackdrop.classList.add('active');
+    }
+}
+
+// Group expenses by period (week or month)
+function groupExpensesByPeriod(expenses, periodType) {
+    const periodExpenses = {};
+    
+    expenses.forEach(expense => {
+        const expenseDate = new Date(expense.date);
+        let periodKey;
+        
+        if (periodType === 'monthly') {
+            // Set to first day of month for the period key
+            periodKey = new Date(expenseDate.getFullYear(), expenseDate.getMonth(), 1).toISOString();
+        } else {
+            // Set to first day of week (Sunday) for the period key
+            const dayOfWeek = expenseDate.getDay();
+            const firstDayOfWeek = new Date(expenseDate);
+            firstDayOfWeek.setDate(expenseDate.getDate() - dayOfWeek);
+            periodKey = new Date(firstDayOfWeek.getFullYear(), firstDayOfWeek.getMonth(), firstDayOfWeek.getDate()).toISOString();
+        }
+        
+        if (!periodExpenses[periodKey]) {
+            periodExpenses[periodKey] = {
+                date: new Date(periodKey),
+                expenses: []
+            };
+        }
+        
+        periodExpenses[periodKey].expenses.push(expense);
+    });
+    
+    return periodExpenses;
+}
+
+// Add styles for historical expenses view
+function addHistoricalExpensesStyles() {
+    const styleId = 'historical-expenses-styles';
+    
+    // Only add styles if they don't already exist
+    if (!document.getElementById(styleId)) {
+        const style = document.createElement('style');
+        style.id = styleId;
+        style.textContent = `
+            .historical-expenses-container {
+                max-height: 70vh;
+                overflow-y: auto;
+            }
+            
+            /* Hide the close button in the footer */
+            #historical-expenses-modal .modal-footer {
+                display: none;
+            }
+            
+            .historical-period-item {
+                margin-bottom: 12px;
+                border: 1px solid var(--border-color);
+                border-radius: 8px;
+                overflow: hidden;
+            }
+            
+            .historical-period-header {
+                display: flex;
+                justify-content: space-between;
+                align-items: center;
+                padding: 12px 16px;
+                background-color: var(--bg-secondary);
+                cursor: pointer;
+                transition: background-color 0.2s ease;
+            }
+            
+            .historical-period-header:hover {
+                background-color: var(--hover-bg);
+            }
+            
+            .period-info {
+                display: flex;
+                justify-content: space-between;
+                align-items: center;
+                flex: 1;
+            }
+            
+            .period-label {
+                font-weight: 600;
+            }
+            
+            .period-amount {
+                font-weight: 600;
+                color: var(--primary-color);
+            }
+            
+            .toggle-icon {
+                margin-left: 10px;
+                font-size: 12px;
+                color: var(--text-secondary);
+                transition: transform 0.3s ease;
+            }
+            
+            .historical-period-expenses {
+                padding: 0;
+                border-top: 1px solid var(--border-color);
+                background-color: var(--bg-card);
+                transition: max-height 0.3s ease, opacity 0.3s ease;
+                will-change: max-height, opacity;
+            }
+            
+            .historical-period-expenses.expanded {
+                border-top: 1px solid var(--border-color);
+            }
+            
+            .historical-expense-item {
+                padding: 12px 16px;
+                border-bottom: 1px solid var(--border-color);
+                background-color: var(--bg-card);
+            }
+            
+            .historical-expense-item:last-child {
+                border-bottom: none;
+            }
+            
+            .clickable {
+                cursor: pointer;
+                transition: transform 0.2s ease, box-shadow 0.2s ease;
+            }
+            
+            .clickable:hover {
+                transform: translateY(-2px);
+                box-shadow: 0 4px 10px rgba(0,0,0,0.1);
+            }
+        `;
+        document.head.appendChild(style);
+    }
+}

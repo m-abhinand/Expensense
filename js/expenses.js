@@ -150,111 +150,68 @@ function formatCurrency(amount) {
     }).format(amount);
 }
 
-// Add currency picker functionality
-function initCurrencyPicker() {
-    // Define currencies with their symbols
+// Initialize circular currency picker FAB
+function initCurrencyFAB() {
+    // Define currencies (same as in initCurrencyPicker)
     const currencies = [
         { code: 'USD', symbol: '$', name: 'US Dollar' },
         { code: 'EUR', symbol: '€', name: 'Euro' },
         { code: 'GBP', symbol: '£', name: 'British Pound' },
         { code: 'JPY', symbol: '¥', name: 'Japanese Yen' },
-        { code: 'CAD', symbol: 'C$', name: 'Canadian Dollar' },
-        { code: 'AUD', symbol: 'A$', name: 'Australian Dollar' },
+        { code: 'CAD', symbol: '$', name: 'Canadian Dollar' }, // Changed from C$
+        { code: 'AUD', symbol: '$', name: 'Australian Dollar' }, // Changed from A$
         { code: 'INR', symbol: '₹', name: 'Indian Rupee' },
         { code: 'CNY', symbol: '¥', name: 'Chinese Yuan' }
     ];
     
     const userCurrency = localStorage.getItem('userCurrency') || 'USD';
+    const currencyFab = document.getElementById('currency-fab');
+    const currencyFabIcon = document.getElementById('currency-fab-icon');
+    const currencyOptions = document.getElementById('currency-options');
     
-    // Find the navbar user-info section where we want to add the currency picker
-    const userInfoSection = document.querySelector('.user-info');
-    if (!userInfoSection) return;
-    
-    // Create currency picker element
-    const currencyPicker = document.createElement('div');
-    currencyPicker.className = 'currency-picker';
-    currencyPicker.innerHTML = `
-        <select id="currency-select" title="Change currency">
-            ${currencies.map(curr => 
-                `<option value="${curr.code}" ${curr.code === userCurrency ? 'selected' : ''}>
-                    ${curr.symbol} ${curr.code}
-                </option>`
-            ).join('')}
-        </select>
-    `;
-    
-    // Add CSS styles
-    const style = document.createElement('style');
-    style.textContent = `
-        .currency-picker {
-            display: flex;
-            align-items: center;
-            margin-right: 15px;
-        }
-        .currency-picker select {
-            padding: 6px 12px;
-            border-radius: 6px;
-            background-color: var(--bg-card, white);
-            border: 1px solid var(--border-color, #ddd);
-            font-size: 14px;
-            font-weight: 500;
-            color: var(--text-color, #333);
-            cursor: pointer;
-            transition: all 0.2s ease;
-            appearance: none;
-            -webkit-appearance: none;
-            background-image: url("data:image/svg+xml;charset=US-ASCII,%3Csvg xmlns='http://www.w3.org/2000/svg' width='14' height='14' viewBox='0 0 24 24' fill='none' stroke='%23555' stroke-width='2' stroke-linecap='round' stroke-linejoin='round'%3E%3Cpolyline points='6 9 12 15 18 9'%3E%3C/polyline%3E%3C/svg%3E");
-            background-repeat: no-repeat;
-            background-position: right 8px center;
-            padding-right: 28px;
-            box-shadow: 0 1px 3px rgba(0,0,0,0.05);
-        }
-        .currency-picker select:hover {
-            border-color: var(--primary-color, #3498db);
-        }
-        .currency-picker select:focus {
-            outline: none;
-            border-color: var(--primary-color, #3498db);
-            box-shadow: 0 0 0 2px rgba(52, 152, 219, 0.2);
-        }
-        .currency-picker select option {
-            padding: 8px;
-            background-color: var(--bg-card, white);
-            color: var(--text-color, #333);
-        }
-        [data-theme="dark"] .currency-picker select {
-            background-color: var(--bg-card, #333);
-            color: var(--text-color, #f5f5f5);
-            border-color: var(--border-color, #555);
-            background-image: url("data:image/svg+xml;charset=US-ASCII,%3Csvg xmlns='http://www.w3.org/2000/svg' width='14' height='14' viewBox='0 0 24 24' fill='none' stroke='%23bbb' stroke-width='2' stroke-linecap='round' stroke-linejoin='round'%3E%3Cpolyline points='6 9 12 15 18 9'%3E%3C/polyline%3E%3C/svg%3E");
-        }
-        [data-theme="dark"] .currency-picker select option {
-            background-color: var(--bg-card, #333);
-            color: var(--text-color, #f5f5f5);
-        }
-    `;
-    document.head.appendChild(style);
-    
-    // Insert the currency picker before the user name in the nav
-    const userName = userInfoSection.querySelector('#user-name');
-    if (userName) {
-        userInfoSection.insertBefore(currencyPicker, userName);
-    } else {
-        userInfoSection.appendChild(currencyPicker);
+    // Set initial currency icon
+    const currentCurrency = currencies.find(c => c.code === userCurrency);
+    if (currentCurrency) {
+        currencyFabIcon.textContent = currentCurrency.symbol;
     }
     
-    // Add event listener
-    document.getElementById('currency-select').addEventListener('change', function() {
-        localStorage.setItem('userCurrency', this.value);
-        // Refresh page to apply new currency
-        location.reload();
+    // Create currency options
+    currencies.forEach(currency => {
+        const option = document.createElement('div');
+        option.className = 'currency-option';
+        option.dataset.code = currency.code;
+        option.innerHTML = `
+            <div class="currency-icon">${currency.symbol}</div>
+            <div class="currency-name">${currency.code}</div>
+        `;
+        
+        // Add click handler for each option
+        option.addEventListener('click', (e) => {
+            e.stopPropagation();
+            localStorage.setItem('userCurrency', currency.code);
+            location.reload();
+        });
+        
+        currencyOptions.appendChild(option);
+    });
+    
+    // Toggle currency options on FAB click
+    currencyFab.addEventListener('click', () => {
+        currencyOptions.classList.toggle('active');
+    });
+    
+    // Close currency options when clicking elsewhere
+    document.addEventListener('click', (e) => {
+        if (!currencyFab.contains(e.target) && !currencyOptions.contains(e.target)) {
+            currencyOptions.classList.remove('active');
+        }
     });
 }
 
 // Initialize the currency picker when DOM is loaded
 document.addEventListener('DOMContentLoaded', function() {
-    // Initialize on all pages that have a navbar
-    if (document.querySelector('.user-info')) {
-        initCurrencyPicker();
-    }
+    // Remove initialization of navbar currency picker
+    
+    // Initialize the currency FAB
+    initCurrencyFAB();
 });

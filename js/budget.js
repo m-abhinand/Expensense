@@ -347,6 +347,7 @@ function openBudgetModal(type) {
 function updateBudgetModalInfo(type) {
     const infoText = document.getElementById('budget-info-text');
     const currentSpendingElement = document.getElementById('current-spending-amount');
+    const currencyIcon = document.querySelector('#budget-modal .input-icon');
     
     if (!infoText || !currentSpendingElement) return;
     
@@ -384,6 +385,24 @@ function updateBudgetModalInfo(type) {
     
     const totalSpent = relevantExpenses.reduce((sum, expense) => sum + expense.amount, 0);
     currentSpendingElement.textContent = formatCurrency(totalSpent);
+    
+    // Update currency symbol based on user selection
+    const userCurrency = localStorage.getItem('userCurrency') || 'USD';
+    const currencies = [
+        { code: 'USD', symbol: '$' },
+        { code: 'EUR', symbol: '€' },
+        { code: 'GBP', symbol: '£' },
+        { code: 'JPY', symbol: '¥' },
+        { code: 'CAD', symbol: 'C$' },
+        { code: 'AUD', symbol: 'A$' },
+        { code: 'INR', symbol: '₹' },
+        { code: 'CNY', symbol: '¥' }
+    ];
+    
+    const currencySymbol = currencies.find(c => c.code === userCurrency)?.symbol || '$';
+    if (currencyIcon) {
+        currencyIcon.textContent = currencySymbol;
+    }
     
     // Update the info text
     if (type === 'monthly') {

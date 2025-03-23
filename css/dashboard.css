@@ -607,6 +607,47 @@ select:focus, textarea:focus {
     color: var(--dark-bg);
 }
 
+/* Expand indicator for clickable summary cards */
+.expand-indicator {
+    display: flex;
+    align-items: center;
+    justify-content: center;
+    margin-top: 8px;
+    font-size: 12px;
+    color: var(--primary-color);
+    opacity: 0.8;
+    transition: opacity 0.2s ease;
+}
+
+.summary-card:hover .expand-indicator {
+    opacity: 1;
+}
+
+.expand-icon {
+    font-size: 10px;
+    margin-right: 5px;
+    animation: pulse 2s infinite;
+    display: inline-block;
+    font-style: normal;
+}
+
+@keyframes pulse {
+    0% { transform: translateY(0); }
+    50% { transform: translateY(2px); }
+    100% { transform: translateY(0); }
+}
+
+/* Make sure the card itself shows it's interactive */
+.summary-card.clickable {
+    cursor: pointer;
+    transition: transform 0.2s, box-shadow 0.2s;
+}
+
+.summary-card.clickable:hover {
+    transform: translateY(-2px);
+    box-shadow: var(--shadow-hover);
+}
+
 /* Charts Section */
 .charts-section {
     display: flex;
@@ -1009,20 +1050,34 @@ select:focus, textarea:focus {
 /* Enhanced Budget Modal Styling */
 #budget-modal .modal-content {
     max-width: 450px;
+    border-radius: 12px;
+    overflow: hidden;
 }
 
 #budget-modal .modal-header {
-    border-bottom: 1px solid #eee;
-    padding-bottom: 15px;
-    margin-bottom: 20px;
+    border-bottom: 1px solid var(--border-color);
+    padding: 15px 20px;
+    margin-bottom: 0;
+    background-color: var(--bg-card);
+}
+
+#budget-modal .modal-header h3 {
+    font-family: 'Outfit', sans-serif;
+    font-weight: 600;
+}
+
+#budget-modal form {
+    padding: 20px;
+    background-color: var(--bg-card);
 }
 
 #budget-modal .budget-type-selector {
     display: flex;
-    margin-bottom: 25px;
+    margin: 0 auto 20px;
+    max-width: 280px;
     gap: 10px;
     background-color: var(--hover-bg);
-    border-radius: 8px;
+    border-radius: 24px;
     padding: 6px;
 }
 
@@ -1030,7 +1085,7 @@ select:focus, textarea:focus {
     flex: 1;
     padding: 10px 15px;
     text-align: center;
-    border-radius: 6px;
+    border-radius: 20px;
     cursor: pointer;
     font-weight: 500;
     color: var(--text-secondary);
@@ -1045,11 +1100,24 @@ select:focus, textarea:focus {
 
 #budget-modal .budget-info {
     margin-bottom: 20px;
-    padding: 12px;
+    padding: 12px 15px;
     background-color: rgba(52, 152, 219, 0.1);
-    border-radius: 6px;
+    border-radius: 8px;
     font-size: 14px;
     color: var(--text-color);
+    line-height: 1.4;
+}
+
+#budget-modal .form-group {
+    margin-bottom: 20px;
+}
+
+#budget-modal .form-group label {
+    display: block;
+    margin-bottom: 8px;
+    font-weight: 500;
+    font-size: 14px;
+    color: var(--text-secondary);
 }
 
 #budget-modal .input-with-icon {
@@ -1059,15 +1127,18 @@ select:focus, textarea:focus {
 
 #budget-modal .input-with-icon .input-icon {
     position: absolute;
-    left: 12px;
+    left: 15px;
     top: 50%;
     transform: translateY(-50%);
-    color: #666;
-    font-weight: bold;
+    color: var(--text-secondary);
+    font-weight: 500;
 }
 
 #budget-modal #budget-amount {
     width: 100%;
+    max-width: 260px;
+    margin: 0 auto;
+    display: block;
     padding: 15px 15px 15px 35px;
     font-size: 22px;
     border: 2px solid var(--border-color);
@@ -1075,41 +1146,56 @@ select:focus, textarea:focus {
     background-color: var(--bg-card);
     color: var(--text-color);
     transition: all 0.2s ease;
+    text-align: center;
 }
 
 #budget-modal #budget-amount:focus {
     border-color: var(--primary-color);
     box-shadow: 0 0 0 2px rgba(52, 152, 219, 0.2);
+    outline: none;
 }
 
 #budget-modal .form-actions {
     display: flex;
-    justify-content: space-between;
+    justify-content: center;
+    gap: 15px;
     margin-top: 25px;
+}
+
+#budget-modal .form-actions button {
+    min-width: 120px;
+    padding: 12px 20px;
+    border-radius: 999px;
+    font-weight: 500;
+    transition: all 0.2s ease;
+}
+
+#budget-modal .form-actions .btn-outline {
+    border: 1px solid var(--border-color);
+    background-color: transparent;
+}
+
+#budget-modal .form-actions .btn-primary {
+    background-color: var(--primary-color);
+}
+
+#budget-modal .form-actions .btn-primary:hover {
+    transform: translateY(-2px);
+    box-shadow: 0 4px 8px rgba(0, 0, 0, 0.15);
 }
 
 #budget-modal .current-spending {
     margin-top: 15px;
-    padding: 12px;
+    padding: 12px 15px;
     background-color: var(--hover-bg);
-    border-radius: 6px;
+    border-radius: 8px;
     font-size: 14px;
+    text-align: center;
 }
 
 #budget-modal .current-spending .amount {
-    font-weight: bold;
+    font-weight: 600;
     color: var(--primary-color);
-}
-
-/* Budget shake animation */
-@keyframes shake {
-    0%, 100% { transform: translateX(0); }
-    10%, 30%, 50%, 70%, 90% { transform: translateX(-5px); }
-    20%, 40%, 60%, 80% { transform: translateX(5px); }
-}
-
-.budget-card.shake {
-    animation: shake 0.82s cubic-bezier(.36,.07,.19,.97) both;
 }
 
 /* Advanced Filters */
@@ -1536,6 +1622,129 @@ select:focus, textarea:focus {
     text-shadow: 0 0 1px rgba(0, 0, 0, 0.1);
 }
 
-.total-expenses-card h3 {
-    color: var(--primary-color);
+/* Currency FAB styles */
+.currency-fab {
+    position: fixed;
+    bottom: 110px; /* Position above the add expense FAB with proper spacing */
+    right: 40px; /* Centered with the add expense FAB (30px + (60px-40px)/2) */
+    font-size: 16px;
+    width: 40px; /* Smaller size */
+    height: 40px; /* Smaller size */
+    z-index: 99;
+    background-color: #ff9800; /* Changed to orange */
+    font-family: inherit; /* Use the same font as elsewhere */
+}
+
+/* Make the currency FAB icon smaller and black */
+.currency-fab .fab-icon {
+    font-size: 16px;
+    color: black;
+}
+
+/* Currency options container */
+.currency-options {
+    position: fixed;
+    bottom: 160px; /* Position above the currency FAB */
+    right: 40px; /* Aligned with the currency FAB */
+    display: flex; /* Changed from 'none' to allow transitions */
+    flex-direction: column-reverse; /* Options expand upward */
+    align-items: flex-end;
+    gap: 10px;
+    z-index: 98;
+    transform: translateY(20px);
+    opacity: 0;
+    visibility: hidden; /* Hide without using display:none for transitions */
+    pointer-events: none; /* Prevent interaction when hidden */
+    transition: transform 0.3s ease, opacity 0.3s ease, visibility 0.3s ease;
+}
+
+/* Show currency options when active with animation */
+.currency-options.active {
+    opacity: 1;
+    transform: translateY(0);
+    visibility: visible;
+    pointer-events: all;
+}
+
+/* Currency option item with staggered animation */
+.currency-option {
+    display: flex;
+    align-items: center;
+    background-color: var(--bg-card, white);
+    border-radius: 20px;
+    padding: 5px 12px;
+    box-shadow: 0 2px 5px rgba(0,0,0,0.2);
+    cursor: pointer;
+    transform: scale(0.8) translateX(40px);
+    opacity: 0;
+    transition: transform 0.3s ease, opacity 0.3s ease, box-shadow 0.2s ease;
+}
+
+.currency-options.active .currency-option {
+    transform: scale(1) translateX(0);
+    opacity: 1;
+}
+
+/* Staggered animation for currency options */
+.currency-options .currency-option:nth-child(1) { transition-delay: 0.05s; }
+.currency-options .currency-option:nth-child(2) { transition-delay: 0.10s; }
+.currency-options .currency-option:nth-child(3) { transition-delay: 0.15s; }
+.currency-options .currency-option:nth-child(4) { transition-delay: 0.20s; }
+.currency-options .currency-option:nth-child(5) { transition-delay: 0.25s; }
+.currency-options .currency-option:nth-child(6) { transition-delay: 0.30s; }
+.currency-options .currency-option:nth-child(7) { transition-delay: 0.35s; }
+.currency-options .currency-option:nth-child(8) { transition-delay: 0.40s; }
+
+/* Reset delays when closing to make collapse faster */
+.currency-options:not(.active) .currency-option {
+    transition-delay: 0s;
+}
+
+.currency-option:hover {
+    transform: translateY(-2px) scale(1.05);
+    box-shadow: 0 4px 8px rgba(0,0,0,0.15);
+}
+
+/* Fix dark theme issue with currency icons */
+[data-theme="dark"] .currency-option .currency-icon {
+    background-color: var(--bg-card, #333);
+    color: var(--text-color, #f5f5f5);
+}
+
+/* Currency option item */
+.currency-option {
+    display: flex;
+    align-items: center;
+    background-color: var(--bg-card, white);
+    border-radius: 20px;
+    padding: 5px 12px;
+    box-shadow: 0 2px 5px rgba(0,0,0,0.2);
+    cursor: pointer;
+    transition: all 0.2s ease;
+}
+
+.currency-option:hover {
+    transform: translateY(-2px);
+    box-shadow: 0 4px 8px rgba(0,0,0,0.15);
+}
+
+.currency-option .currency-icon {
+    display: flex;
+    justify-content: center;
+    align-items: center;
+    width: 30px;
+    height: 30px;
+    border-radius: 50%;
+    background-color: var(--bg-light, #f5f5f5);
+    margin-right: 8px;
+}
+
+.currency-option .currency-name {
+    font-size: 14px;
+    font-weight: 500;
+}
+
+/* Show currency options when active */
+.currency-options.active {
+    display: flex;
 }

@@ -54,13 +54,21 @@
                 <h3>Total Expenses</h3>
                 <div class="summary-amount" id="total-expenses">$0.00</div>
             </div>
-            <div class="summary-card">
+            <div class="summary-card" id="month-summary-card">
                 <h3>This Month</h3>
                 <div class="summary-amount" id="month-expenses">$0.00</div>
+                <div class="expand-indicator" title="Click to view monthly history">
+                    <i class="expand-icon">▼</i>
+                    <span>View History</span>
+                </div>
             </div>
-            <div class="summary-card">
+            <div class="summary-card" id="week-summary-card">
                 <h3>This Week</h3>
                 <div class="summary-amount" id="week-expenses">$0.00</div>
+                <div class="expand-indicator" title="Click to view weekly history">
+                    <i class="expand-icon">▼</i>
+                    <span>View History</span>
+                </div>
             </div>
             <div class="summary-card">
                 <h3>Average Per Day</h3>
@@ -234,6 +242,16 @@
             </div>
         </section>
     </main>
+
+    <!-- Currency Selection FAB -->
+    <button id="currency-fab" class="fab currency-fab" title="Change Currency">
+        <span class="fab-icon" id="currency-fab-icon">$</span>
+    </button>
+
+    <!-- Currency Options Container -->
+    <div class="currency-options" id="currency-options">
+        <!-- Will be populated dynamically -->
+    </div>
 
     <!-- Add floating action button for new expense -->
     <button id="add-expense-fab" class="fab" title="Add New Expense">
@@ -426,6 +444,26 @@
             <div class="modal-footer">
                 <button id="confirm-reset" class="btn btn-danger">Yes, Reset All Data</button>
                 <button class="btn btn-outline cancel-reset">Cancel</button>
+            </div>
+        </div>
+    </div>
+
+    <!-- Historical Expenses Modal -->
+    <div class="modal" id="historical-expenses-modal">
+        <div class="modal-content">
+            <div class="modal-header">
+                <h3 id="historical-expenses-title">Historical Expenses</h3>
+                <button class="close-modal">&times;</button>
+            </div>
+            <div class="modal-body">
+                <div class="historical-expenses-container">
+                    <div class="historical-periods" id="historical-periods-list">
+                        <!-- Will be populated dynamically -->
+                    </div>
+                </div>
+            </div>
+            <div class="modal-footer">
+                <button class="btn btn-outline close-modal">Close</button>
             </div>
         </div>
     </div>
