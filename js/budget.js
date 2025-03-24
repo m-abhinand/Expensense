@@ -69,6 +69,21 @@ class BudgetManager {
         return this.budgets;
     }
 
+    // Clear a budget
+    clearBudget(type) {
+        if (!this.currentUser) return false;
+        if (type !== 'monthly' && type !== 'weekly') return false;
+        
+        // Delete the budget
+        delete this.budgets[type];
+        this.saveBudgets();
+        
+        // Dispatch event for budget updates
+        document.dispatchEvent(new Event('budgetsUpdated'));
+        
+        return true;
+    }
+
     // Check if spending exceeds budget
     checkBudgetStatus(type) {
         const budget = this.getBudget(type);
@@ -153,6 +168,7 @@ function updateBudgetDisplay(type) {
     if (status.isSet) {
         // Update amount displays
         budgetAmountElement.textContent = formatCurrency(status.budget);
+        budgetAmountElement.className = 'budget-value';
         budgetElement.textContent = formatCurrency(status.budget);
         spentElement.textContent = formatCurrency(status.spent);
         percentageElement.textContent = Math.round(status.percentage) + '%';
@@ -181,8 +197,9 @@ function updateBudgetDisplay(type) {
             budgetCard.classList.remove('exceeded');
         }
     } else {
-        // Show "Not Set" when budget is not set
-        budgetAmountElement.textContent = 'Not Set';
+        // Show "Set Budget" button when budget is not set
+        budgetAmountElement.innerHTML = `<button class="btn btn-primary set-budget-btn" data-type="${type}">Set ${type.charAt(0).toUpperCase() + type.slice(1)} Budget</button>`;
+        budgetAmountElement.className = 'budget-cta';
         budgetElement.textContent = '$0.00';
         spentElement.textContent = '$0.00';
         percentageElement.textContent = '0%';
@@ -296,6 +313,50 @@ function initBudgetUI() {
     
     // Update budget displays when expenses are updated
     document.addEventListener('expensesUpdated', updateBudgetDisplays);
+    
+    // Set up clear budget buttons
+    const clearBudgetButtons = document.querySelectorAll('.clear-budget');
+    clearBudgetButtons.forEach(button => {
+        button.addEventListener('click', function() {
+            const type = this.dataset.type;
+            openClearBudgetModal(type);
+        });
+    });
+    
+    // Set up confirmation for clearing budget
+    const confirmClearBudget = document.getElementById('confirm-clear-budget');
+    if (confirmClearBudget) {
+        confirmClearBudget.addEventListener('click', function() {
+            const type = this.dataset.type;
+            
+            // Clear the budget
+            budgetManager.clearBudget(type);
+            
+            // Update displays
+            updateBudgetDisplays();
+            
+            // Close the modal
+            closeAllModals();
+            
+            // Show success message
+            const typeLabel = type.charAt(0).toUpperCase() + type.slice(1);
+            showMessage(`${typeLabel} budget has been cleared.`, 'success');
+        });
+    }
+    
+    // Add cancel clear budget functionality
+    const cancelClearBudget = document.querySelector('.cancel-clear-budget');
+    if (cancelClearBudget) {
+        cancelClearBudget.addEventListener('click', closeAllModals);
+    }
+    
+    // Add event delegation for dynamically added Set Budget buttons
+    document.addEventListener('click', function(event) {
+        if (event.target.classList.contains('set-budget-btn')) {
+            const type = event.target.dataset.type;
+            openBudgetModal(type);
+        }
+    });
 }
 
 // Open budget setting modal
@@ -341,6 +402,33 @@ function openBudgetModal(type) {
     setTimeout(() => {
         amountInput.focus();
     }, 100);
+}
+
+// Open clear budget confirmation modal
+function openClearBudgetModal(type) {
+    const modal = document.getElementById('clear-budget-modal');
+    const modalBackdrop = document.getElementById('modal-backdrop');
+    const typeTitle = document.getElementById('clear-budget-type-title');
+    const typeText = document.getElementById('clear-budget-type-text');
+    const confirmButton = document.getElementById('confirm-clear-budget');
+    
+    // Make sure the budget is set before allowing to clear it
+    const currentBudget = budgetManager.getBudget(type);
+    if (!currentBudget) {
+        showMessage(`No ${type} budget is currently set.`, 'info');
+        return;
+    }
+    
+    // Set the budget type
+    typeTitle.textContent = type.charAt(0).toUpperCase() + type.slice(1);
+    typeText.textContent = type;
+    
+    // Set the type attribute on the confirm button
+    confirmButton.dataset.type = type;
+    
+    // Show the modal
+    modal.classList.add('active');
+    modalBackdrop.classList.add('active');
 }
 
 // Update budget modal info text and current spending

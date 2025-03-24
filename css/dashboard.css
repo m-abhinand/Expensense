@@ -808,7 +808,8 @@ select:focus, textarea:focus {
     padding: 20px;
     position: relative;
     overflow: hidden;
-    transition: all 0.3s ease;
+    transition: background-color var(--transition-speed) ease, 
+                box-shadow var(--transition-speed) ease;
 }
 
 .budget-header {
@@ -872,12 +873,6 @@ select:focus, textarea:focus {
     animation: pulse 1.5s infinite;
 }
 
-@keyframes pulse {
-    0% { opacity: 0.6; }
-    50% { opacity: 1; }
-    100% { opacity: 0.6; }
-}
-
 /* Budget exceeded alert */
 .budget-alert {
     position: absolute;
@@ -891,29 +886,26 @@ select:focus, textarea:focus {
     font-weight: 500;
     transform: translateY(100%);
     transition: transform 0.3s ease;
+    display: flex;
+    align-items: center;
+    justify-content: center;
+    gap: 8px;
+    font-size: 14px;
+    animation: pulse 2s infinite;
+}
+
+.budget-alert::before {
+    content: "⚠️";
 }
 
 .budget-card.exceeded .budget-alert {
     transform: translateY(0);
 }
 
-.btn-icon {
-    background: none;
-    border: none;
-    cursor: pointer;
-    font-size: 1.2rem;
-    color: #777;
-    padding: 5px;
-    border-radius: 50%;
-    display: flex;
-    align-items: center;
-    justify-content: center;
-    transition: all 0.2s ease;
-}
-
-.btn-icon:hover {
-    background-color: rgba(0, 0, 0, 0.05);
-    color: var(--primary-color);
+@keyframes pulse {
+    0% { opacity: 0.8; }
+    50% { opacity: 1; }
+    100% { opacity: 0.8; }
 }
 
 /* Budget reached shake animation */
@@ -929,9 +921,11 @@ select:focus, textarea:focus {
 
 /* Enhanced Budget Cards Styling */
 .budget-card {
-    transition: all 0.3s ease;
     position: relative;
     overflow: hidden;
+    transition: box-shadow 0.3s ease, 
+                transform 0.3s ease,
+                background-color var(--transition-speed) ease;
 }
 
 .budget-card .budget-header {
@@ -962,7 +956,7 @@ select:focus, textarea:focus {
 }
 
 .budget-card.weekly .budget-header h3::before {
-    background-image: url("data:image/svg+xml,%3Csvg xmlns='http://www.w3.org/2000/svg' viewBox='0 0 24 24' fill='%23e67e22'%3E%3Cpath d='M12 2C6.48 2 2 6.48 2 12s4.48 10 10 10 10-4.48 10-10S17.52 2 12 2zm0 18c-4.41 0-8-3.59-8-8s3.59-8 8-8 8 3.59 8 8-3.59 8-8 8zm-1-6.5h2v2h-2zm0-8h2v6h-2z'/%3E%3C/svg%3E");
+    background-image: url("data:image/svg+xml,%3Csvg xmlns='http://www.w3.org/2000/svg' viewBox='0 0 24 24' fill='%23e67e22'%3E%3Cpath d='M19 3h-1V1h-2v2H8V1H6v2H5c-1.1 0-2 .9-2 2v14c0 1.1.9 2 2 2h14c1.1 0 2-.9 2-2V5c0-1.1-.9-2-2-2zm0 16H5V8h14v11zM9 10H7v2h2v-2zm4 0h-2v2h2v-2zm4 0h-2v2h2v-2zm-8 4H7v2h2v-2zm4 0h-2v2h2v-2zm4 0h-2v2h2v-2z'/%3E%3C/svg%3E");
 }
 
 .budget-card .set-budget {
@@ -988,6 +982,35 @@ select:focus, textarea:focus {
     font-weight: bold;
     margin-bottom: 10px;
     color: var(--text-color);
+    display: flex;
+    justify-content: center;
+}
+
+.budget-card .budget-cta {
+    display: flex;
+    justify-content: center;
+    margin: 5px 0 15px;
+}
+
+.budget-card .set-budget-btn {
+    padding: 10px 15px;
+    border-radius: 20px;
+    font-size: 14px;
+    font-weight: 500;
+    transition: all 0.25s ease;
+    box-shadow: 0 2px 5px rgba(0,0,0,0.1);
+    animation: pulse-subtle 2s infinite;
+}
+
+.budget-card .set-budget-btn:hover {
+    transform: translateY(-2px);
+    box-shadow: 0 4px 8px rgba(0,0,0,0.15);
+}
+
+@keyframes pulse-subtle {
+    0% { box-shadow: 0 2px 5px rgba(0,0,0,0.1); }
+    50% { box-shadow: 0 3px 10px rgba(52, 152, 219, 0.25); }
+    100% { box-shadow: 0 2px 5px rgba(0,0,0,0.1); }
 }
 
 .budget-card .budget-progress-container {
@@ -1039,12 +1062,6 @@ select:focus, textarea:focus {
 
 .budget-alert::before {
     content: "⚠️";
-}
-
-@keyframes pulse {
-    0% { opacity: 0.8; }
-    50% { opacity: 1; }
-    100% { opacity: 0.8; }
 }
 
 /* Enhanced Budget Modal Styling */
@@ -1747,4 +1764,28 @@ select:focus, textarea:focus {
 /* Show currency options when active */
 .currency-options.active {
     display: flex;
+}
+
+.budget-actions {
+    display: flex;
+    align-items: center;
+    gap: 8px;
+}
+
+.budget-card .clear-budget {
+    background-color: rgba(231, 76, 60, 0.1);
+    border-radius: 50%;
+    width: 32px;
+    height: 32px;
+    display: flex;
+    align-items: center;
+    justify-content: center;
+    border: none;
+    cursor: pointer;
+    transition: all 0.2s ease;
+}
+
+.budget-card .clear-budget:hover {
+    background-color: rgba(231, 76, 60, 0.2);
+    transform: scale(1.1);
 }

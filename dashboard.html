@@ -81,7 +81,10 @@
             <div class="budget-card monthly">
                 <div class="budget-header">
                     <h3>Monthly Budget</h3>
-                    <button class="btn-icon set-budget" data-type="monthly" title="Set Monthly Budget">⚙️</button>
+                    <div class="budget-actions">
+                        <button class="btn-icon clear-budget" data-type="monthly" title="Clear Monthly Budget">🔄</button>
+                        <button class="btn-icon set-budget" data-type="monthly" title="Set Monthly Budget">⚙️</button>
+                    </div>
                 </div>
                 <div class="budget-content">
                     <div class="budget-amount">
@@ -99,7 +102,10 @@
             <div class="budget-card weekly">
                 <div class="budget-header">
                     <h3>Weekly Budget</h3>
-                    <button class="btn-icon set-budget" data-type="weekly" title="Set Weekly Budget">⚙️</button>
+                    <div class="budget-actions">
+                        <button class="btn-icon clear-budget" data-type="weekly" title="Clear Weekly Budget">🔄</button>
+                        <button class="btn-icon set-budget" data-type="weekly" title="Set Weekly Budget">⚙️</button>
+                    </div>
                 </div>
                 <div class="budget-content">
                     <div class="budget-amount">
@@ -464,6 +470,24 @@
             </div>
             <div class="modal-footer">
                 <button class="btn btn-outline close-modal">Close</button>
+            </div>
+        </div>
+    </div>
+
+    <!-- Clear Budget Confirmation Modal -->
+    <div class="modal" id="clear-budget-modal">
+        <div class="modal-content">
+            <div class="modal-header">
+                <h3>Clear <span id="clear-budget-type-title">Monthly</span> Budget</h3>
+                <button class="close-modal">&times;</button>
+            </div>
+            <div class="modal-body">
+                <p>Are you sure you want to clear your <span id="clear-budget-type-text">monthly</span> budget?</p>
+                <p>Your expense data will remain intact.</p>
+            </div>
+            <div class="modal-footer">
+                <button id="confirm-clear-budget" class="btn btn-danger">Clear Budget</button>
+                <button class="btn btn-outline cancel-clear-budget">Cancel</button>
             </div>
         </div>
     </div>
