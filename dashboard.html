@@ -14,6 +14,170 @@
     <link rel="preconnect" href="https://fonts.googleapis.com">
     <link rel="preconnect" href="https://fonts.gstatic.com" crossorigin>
     <link href="https://fonts.googleapis.com/css2?family=DM+Sans:ital,opsz,wght@0,9..40,100..1000;1,9..40,100..1000&family=Outfit:wght@100..900&display=swap" rel="stylesheet">
+    <!-- Material Symbols for icons -->
+    <link rel="stylesheet" href="https://fonts.googleapis.com/css2?family=Material+Symbols+Outlined:opsz,wght,FILL,GRAD@24,400,0,0" />
+    <style>
+    .material-symbols-outlined {
+      font-variation-settings:
+      'FILL' 0,
+      'wght' 400,
+      'GRAD' 0,
+      'opsz' 24
+    }
+    
+    /* Custom style for icon-only buttons with circular background */
+    .icon-only-btn {
+        background-color: var(--hover-bg);
+        border: none;
+        padding: 8px;
+        cursor: pointer;
+        display: flex;
+        align-items: center;
+        justify-content: center;
+        border-radius: 50%;
+        transition: background-color var(--transition-speed) ease;
+    }
+    
+    .icon-only-btn:hover {
+        background-color: var(--border-color);
+    }
+    
+    /* Dark mode styling enhancements */
+    html[data-theme="dark"] .icon-only-btn {
+        background-color: rgba(255, 255, 255, 0.15);
+    }
+    
+    html[data-theme="dark"] .icon-only-btn:hover {
+        background-color: rgba(255, 255, 255, 0.25);
+    }
+    
+    /* Override the dropdown hover behavior */
+    .dropdown:hover .dropdown-menu {
+        transform: none;
+        opacity: 0;
+        visibility: hidden;
+    }
+    
+    /* Show dropdown only when it has the active class */
+    .dropdown.active .dropdown-menu {
+        transform: scale(1);
+        opacity: 1;
+        visibility: visible;
+        transition: transform var(--transition-speed) ease, 
+                opacity var(--transition-speed) ease, 
+                visibility 0s;
+    }
+
+    /* Custom styling for set budget buttons */
+    .set-budget-btn {
+        background: linear-gradient(to right, #3498db, #2980b9);
+        color: white;
+        border: none;
+        border-radius: 20px;
+        padding: 8px 16px;
+        font-weight: 500;
+        box-shadow: 0 2px 5px rgba(0, 0, 0, 0.1);
+        transition: all 0.3s ease;
+        font-family: inherit; /* Ensure button uses the website's font */
+    }
+    
+    .set-budget-btn:hover {
+        transform: translateY(-2px);
+        box-shadow: 0 4px 8px rgba(0, 0, 0, 0.15);
+        background: linear-gradient(to right, #2980b9, #3498db);
+    }
+    
+    /* Style for View History text in summary cards */
+    .expand-indicator span {
+        color: var(--text-secondary);
+    }
+    </style>
+    
+    <!-- Add script to fix historical expense view styling -->
+    <script>
+        // This ensures the styling for historical expenses is initialized
+        document.addEventListener('DOMContentLoaded', function() {
+            // Add the historical expenses styles regardless of which one is clicked first
+            const styleId = 'historical-expenses-styles';
+            if (!document.getElementById(styleId)) {
+                const style = document.createElement('style');
+                style.id = styleId;
+                style.textContent = `
+                    .historical-period-item {
+                        border: 1px solid var(--border-color);
+                        border-radius: 8px;
+                        margin-bottom: 10px;
+                        padding: 8px;
+                    }
+                    
+                    .historical-period-header {
+                        display: flex;
+                        justify-content: space-between;
+                        align-items: center;
+                        padding: 10px 5px;
+                        cursor: pointer;
+                        font-weight: 500;
+                    }
+                    
+                    .period-info {
+                        display: flex;
+                        flex-direction: column;
+                    }
+                    
+                    .period-label {
+                        font-weight: 600;
+                        color: var(--primary-color);
+                    }
+                    
+                    .period-amount {
+                        font-size: 0.9em;
+                        color: var(--text-secondary);
+                    }
+                    
+                    .toggle-icon {
+                        font-size: 0.8em;
+                        color: var(--text-secondary);
+                    }
+                    
+                    .historical-period-expenses {
+                        overflow: hidden;
+                        transition: max-height 0.3s ease, opacity 0.3s ease;
+                        max-height: 0;
+                        opacity: 0;
+                    }
+                    
+                    .historical-period-expenses.expanded {
+                        opacity: 1;
+                    }
+                    
+                    .historical-expense-item {
+                        padding: 10px;
+                        margin: 5px 0;
+                        border-radius: 8px;
+                        background-color: var(--hover-bg);
+                    }
+                    
+                    .historical-expense-item .expense-header {
+                        display: flex;
+                        justify-content: space-between;
+                    }
+                    
+                    .historical-expense-item .expense-date {
+                        font-size: 0.85em;
+                        color: var(--text-secondary);
+                        margin-top: 4px;
+                    }
+                    
+                    .historical-expense-item .expense-notes {
+                        font-size: 0.85em;
+                        margin-top: 4px;
+                        color: var(--text-secondary);
+                    }
+                `;
+                document.head.appendChild(style);
+            }
+        });
+    </script>
 </head>
 <body>
     <header>
@@ -23,11 +187,11 @@
                 <button id="theme-toggle" class="theme-toggle" title="Toggle Dark Mode">
                     <span id="theme-icon">🌙</span>
                 </button>
-                <span id="user-name">User</span>
                 <div class="user-actions">
-                    <div class="dropdown">
-                        <button class="btn btn-outline btn-sm dropdown-toggle">
-                            <span class="icon">⚙️</span> Options
+                    <!-- Share dropdown with icon-only button -->
+                    <div class="dropdown" id="share-dropdown">
+                        <button class="icon-only-btn" title="Share" id="share-btn">
+                            <span class="material-symbols-outlined">ios_share</span>
                         </button>
                         <div class="dropdown-menu">
                             <button id="export-csv" class="dropdown-item">
@@ -36,13 +200,27 @@
                             <button id="export-pdf" class="dropdown-item">
                                 <span class="icon">📑</span> Export to PDF
                             </button>
+                        </div>
+                    </div>
+                    <!-- Profile dropdown -->
+                    <div class="dropdown" id="profile-dropdown">
+                        <button class="icon-only-btn" title="Profile" id="profile-btn">
+                            <span class="material-symbols-outlined">face</span>
+                        </button>
+                        <div class="dropdown-menu">
+                            <div class="dropdown-item">
+                                <span class="icon">👤</span> <span id="user-name">User</span>
+                            </div>
+                            <div class="dropdown-divider"></div>
+                            <button id="logout-btn" class="dropdown-item">
+                                <span class="icon">🚪</span> Logout
+                            </button>
                             <div class="dropdown-divider"></div>
                             <button id="reset-data" class="dropdown-item danger">
                                 <span class="icon">🗑️</span> Reset Data
                             </button>
                         </div>
                     </div>
-                    <button id="logout-btn" class="btn btn-outline">Logout</button>
                 </div>
             </div>
         </div>
@@ -70,9 +248,13 @@
                     <span>View History</span>
                 </div>
             </div>
-            <div class="summary-card">
+            <div class="summary-card" id="day-summary-card">
                 <h3>Average Per Day</h3>
                 <div class="summary-amount" id="avg-expenses">$0.00</div>
+                <div class="expand-indicator" title="Click to view daily history">
+                    <i class="expand-icon">▼</i>
+                    <span>View History</span>
+                </div>
             </div>
         </section>
 
@@ -468,9 +650,7 @@
                     </div>
                 </div>
             </div>
-            <div class="modal-footer">
-                <button class="btn btn-outline close-modal">Close</button>
-            </div>
+            <!-- Removing the footer with the Close button -->
         </div>
     </div>
 
@@ -502,5 +682,44 @@
     <script src="./js/dashboard-charts.js"></script>
     <script src="./js/export.js"></script>
     <script src="./js/theme.js"></script>
+    <script src="./js/daily-expenses-history.js"></script>
+    
+    <!-- Add script for dropdown toggle functionality -->
+    <script>
+        document.addEventListener('DOMContentLoaded', function() {
+            const shareBtn = document.getElementById('share-btn');
+            const shareDropdown = document.getElementById('share-dropdown');
+            const profileBtn = document.getElementById('profile-btn');
+            const profileDropdown = document.getElementById('profile-dropdown');
+            
+            // Toggle dropdown on share button click
+            shareBtn.addEventListener('click', function(e) {
+                e.stopPropagation(); // Prevent the click from reaching document
+                shareDropdown.classList.toggle('active');
+                profileDropdown.classList.remove('active'); // Close other dropdown
+            });
+            
+            // Toggle dropdown on profile button click
+            profileBtn.addEventListener('click', function(e) {
+                e.stopPropagation();
+                profileDropdown.classList.toggle('active');
+                shareDropdown.classList.remove('active'); // Close other dropdown
+            });
+            
+            // Close dropdowns when clicking outside
+            document.addEventListener('click', function() {
+                shareDropdown.classList.remove('active');
+                profileDropdown.classList.remove('active');
+            });
+            
+            // Prevent clicks inside dropdowns from closing them
+            const dropdownMenus = document.querySelectorAll('.dropdown-menu');
+            dropdownMenus.forEach(menu => {
+                menu.addEventListener('click', function(e) {
+                    e.stopPropagation();
+                });
+            });
+        });
+    </script>
 </body>
 </html>
