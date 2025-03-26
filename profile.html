@@ -1,0 +1,452 @@
+<!DOCTYPE html>
+<html lang="en" data-theme="light">
+<head>
+    <meta charset="UTF-8">
+    <meta name="viewport" content="width=device-width, initial-scale=1.0">
+    <title>Expense Tracker - User Profile</title>
+    <link rel="stylesheet" href="./css/main.css">
+    <link rel="stylesheet" href="./css/profile.css">
+    <link rel="preconnect" href="https://fonts.googleapis.com">
+    <link rel="preconnect" href="https://fonts.gstatic.com" crossorigin>
+    <link href="https://fonts.googleapis.com/css2?family=DM+Sans:ital,opsz,wght@0,9..40,100..1000;1,9..40,100..1000&family=Outfit:wght@100..900&display=swap" rel="stylesheet">
+    <!-- Material Symbols for icons -->
+    <link rel="stylesheet" href="https://fonts.googleapis.com/css2?family=Material+Symbols+Outlined:opsz,wght,FILL,GRAD@24,400,0,0" />
+    <style>
+    .material-symbols-outlined {
+      font-variation-settings:
+      'FILL' 0,
+      'wght' 400,
+      'GRAD' 0,
+      'opsz' 24
+    }
+    
+    /* Custom style for icon-only buttons with circular background */
+    .icon-only-btn {
+        background-color: var(--hover-bg);
+        border: none;
+        padding: 8px;
+        cursor: pointer;
+        display: flex;
+        align-items: center;
+        justify-content: center;
+        border-radius: 50%;
+        transition: background-color var(--transition-speed) ease;
+    }
+    
+    .icon-only-btn:hover {
+        background-color: var(--border-color);
+    }
+    
+    /* Dark mode styling enhancements */
+    html[data-theme="dark"] .icon-only-btn {
+        background-color: rgba(255, 255, 255, 0.15);
+    }
+    
+    html[data-theme="dark"] .icon-only-btn:hover {
+        background-color: rgba(255, 255, 255, 0.25);
+    }
+    
+    /* Override the dropdown hover behavior */
+    .dropdown:hover .dropdown-menu {
+        transform: none;
+        opacity: 0;
+        visibility: hidden;
+    }
+    
+    /* Show dropdown only when it has the active class */
+    .dropdown.active .dropdown-menu {
+        transform: scale(1);
+        opacity: 1;
+        visibility: visible;
+        transition: transform var(--transition-speed) ease, 
+                opacity var(--transition-speed) ease, 
+                visibility 0s;
+    }
+
+    /* Add navbar styling to match dashboard */
+    header .container {
+        display: flex;
+        justify-content: space-between;
+        align-items: center;
+        padding: 0.75rem 0;
+        max-width: 1200px;
+        margin: 0 auto;
+    }
+    
+    .user-info {
+        display: flex;
+        align-items: center;
+        gap: 12px;
+    }
+    
+    .user-actions {
+        display: flex;
+        align-items: center;
+        gap: 8px;
+    }
+    
+    .theme-toggle {
+        background: none;
+        border: none;
+        font-size: var(--font-xl);
+        color: var(--text-color);
+        width: 40px;
+        height: 40px;
+        border-radius: 50%;
+        display: flex;
+        align-items: center;
+        justify-content: center;
+        transition: all 0.3s ease;
+        background-color: rgba(255, 255, 255, 0.05);
+        cursor: pointer;
+    }
+    
+    .theme-toggle:hover {
+        background-color: var(--hover-bg);
+    }
+    
+    .dropdown {
+        position: relative;
+    }
+    
+    .dropdown-menu {
+        position: absolute;
+        top: 100%;
+        right: 0;
+        background-color: var(--bg-card);
+        border-radius: var(--border-radius-sm);
+        box-shadow: var(--box-shadow);
+        min-width: 180px;
+        z-index: 1000;
+        overflow: hidden;
+        margin-top: 8px;
+        transform-origin: top right;
+        transform: scale(0.95);
+        opacity: 0;
+        visibility: hidden;
+        transition: transform var(--transition-speed) ease, 
+                    opacity var(--transition-speed) ease, 
+                    visibility 0s linear var(--transition-speed),
+                    background-color var(--transition-speed) ease;
+    }
+    
+    .dropdown-item {
+        display: flex;
+        align-items: center;
+        gap: 8px;
+        padding: 10px 15px;
+        cursor: pointer;
+        text-decoration: none;
+        color: var(--text-color);
+        border: none;
+        background: none;
+        width: 100%;
+        text-align: left;
+        font-size: var(--font-sm);
+        transition: background-color var(--transition-speed) ease,
+                    color var(--transition-speed) ease;
+    }
+    
+    .dropdown-item:hover {
+        background-color: var(--hover-bg);
+    }
+    
+    .dropdown-item.active {
+        color: var(--primary-color);
+        background-color: var(--hover-bg);
+    }
+    
+    .dropdown-item.danger {
+        color: var(--danger-color);
+    }
+    
+    .dropdown-item.danger:hover {
+        background-color: rgba(231, 76, 60, 0.1);
+    }
+    
+    .dropdown-divider {
+        height: 1px;
+        background-color: var(--border-color);
+        margin: 5px 0;
+    }
+    
+    .icon {
+        font-size: 16px;
+    }
+    </style>
+</head>
+<body>
+    <header>
+        <div class="container">
+            <h1>Expensense</h1>
+            <div class="user-info">
+                <button id="theme-toggle" class="theme-toggle" title="Toggle Dark Mode">
+                    <span id="theme-icon">🌙</span>
+                </button>
+                <div class="user-actions">
+                    <!-- Share dropdown with icon-only button -->
+                    <div class="dropdown" id="share-dropdown">
+                        <button class="icon-only-btn" title="Share" id="share-btn">
+                            <span class="material-symbols-outlined">ios_share</span>
+                        </button>
+                        <div class="dropdown-menu">
+                            <button id="export-csv" class="dropdown-item">
+                                <span class="icon">📄</span> Export to CSV
+                            </button>
+                            <button id="export-pdf" class="dropdown-item">
+                                <span class="icon">📑</span> Export to PDF
+                            </button>
+                        </div>
+                    </div>
+                    <!-- Profile dropdown -->
+                    <div class="dropdown" id="profile-dropdown">
+                        <button class="icon-only-btn" title="Profile" id="profile-btn">
+                            <span class="material-symbols-outlined">face</span>
+                        </button>
+                        <div class="dropdown-menu">
+                            <a href="profile.html" class="dropdown-item active">
+                                <span class="icon">👤</span> <span id="user-name">User</span>
+                            </a>
+                            <div class="dropdown-divider"></div>
+                            <button id="logout-btn" class="dropdown-item">
+                                <span class="icon">🚪</span> Logout
+                            </button>
+                            <div class="dropdown-divider"></div>
+                            <button id="reset-data" class="dropdown-item danger">
+                                <span class="icon">🗑️</span> Reset Data
+                            </button>
+                        </div>
+                    </div>
+                </div>
+            </div>
+        </div>
+    </header>
+
+    <main class="container">
+        <div class="back-to-dashboard">
+            <a href="dashboard.html" class="back-link">
+                <span class="material-symbols-outlined">arrow_back</span>
+                Back to Dashboard
+            </a>
+        </div>
+
+        <div class="profile-container">
+            <div class="profile-header card">
+                <div class="profile-avatar">
+                    <span class="material-symbols-outlined avatar-icon">account_circle</span>
+                </div>
+                <div class="profile-title">
+                    <h2 id="profile-name">User Name</h2>
+                    <p id="profile-email">user@example.com</p>
+                </div>
+                <div class="profile-actions">
+                    <button id="edit-profile-btn" class="btn btn-outline">
+                        <span class="material-symbols-outlined">edit</span>
+                        Edit Profile
+                    </button>
+                </div>
+            </div>
+
+            <div class="profile-body">
+                <div class="profile-section card">
+                    <h3>Personal Information</h3>
+                    <div class="profile-info-container" id="profile-info-view">
+                        <div class="profile-info-row">
+                            <div class="profile-info-label">Full Name</div>
+                            <div class="profile-info-value" id="info-name">John Doe</div>
+                        </div>
+                        <div class="profile-info-row">
+                            <div class="profile-info-label">Email</div>
+                            <div class="profile-info-value" id="info-email">john.doe@example.com</div>
+                        </div>
+                        <div class="profile-info-row">
+                            <div class="profile-info-label">Member Since</div>
+                            <div class="profile-info-value" id="info-joined">January 1, 2023</div>
+                        </div>
+                    </div>
+
+                    <form class="profile-edit-form" id="profile-edit-form" style="display: none;">
+                        <div class="form-group">
+                            <label for="edit-name">Full Name</label>
+                            <input type="text" id="edit-name" name="name">
+                        </div>
+                        <div class="form-group">
+                            <label for="edit-email">Email</label>
+                            <input type="email" id="edit-email" name="email">
+                        </div>
+                        <div class="form-actions">
+                            <button type="submit" class="btn btn-primary">Save Changes</button>
+                            <button type="button" id="cancel-edit" class="btn btn-outline">Cancel</button>
+                        </div>
+                    </form>
+                </div>
+
+                <div class="profile-section card">
+                    <h3>Account Settings</h3>
+                    <div class="account-settings">
+                        <div class="setting-row">
+                            <div class="setting-info">
+                                <h4>Change Password</h4>
+                                <p>Update your password to improve security</p>
+                            </div>
+                            <button id="change-password-btn" class="btn btn-outline">Change Password</button>
+                        </div>
+                        <div class="setting-row">
+                            <div class="setting-info">
+                                <h4>Default Currency</h4>
+                                <p>Set your preferred currency for expenses</p>
+                            </div>
+                            <div class="currency-selector">
+                                <select id="currency-select">
+                                    <option value="USD">USD ($)</option>
+                                    <option value="EUR">EUR (€)</option>
+                                    <option value="GBP">GBP (£)</option>
+                                    <option value="INR">INR (₹)</option>
+                                    <option value="JPY">JPY (¥)</option>
+                                </select>
+                            </div>
+                        </div>
+                    </div>
+                </div>
+
+                <div class="profile-section card">
+                    <h3>Your Statistics</h3>
+                    <div class="stats-container">
+                        <div class="stat-item">
+                            <div class="stat-value" id="total-expenses-count">0</div>
+                            <div class="stat-label">Total Expenses</div>
+                        </div>
+                        <div class="stat-item">
+                            <div class="stat-value" id="categories-used">0</div>
+                            <div class="stat-label">Categories Used</div>
+                        </div>
+                        <div class="stat-item">
+                            <div class="stat-value" id="avg-expense-amount">$0.00</div>
+                            <div class="stat-label">Average Expense</div>
+                        </div>
+                        <div class="stat-item">
+                            <div class="stat-value" id="most-used-category">None</div>
+                            <div class="stat-label">Top Category</div>
+                        </div>
+                    </div>
+                </div>
+            </div>
+        </div>
+    </main>
+
+    <!-- Change Password Modal -->
+    <div class="modal" id="change-password-modal">
+        <div class="modal-content">
+            <div class="modal-header"></div>
+                <h3>Change Password</h3>
+                <button class="close-modal">&times;</button>
+            </div>
+            <form id="change-password-form">
+                <div class="form-group">
+                    <label for="current-password">Current Password</label>
+                    <input type="password" id="current-password" name="current-password" required>
+                    <span class="error-message" id="current-password-error"></span>
+                </div>
+                <div class="form-group">
+                    <label for="new-password">New Password</label>
+                    <input type="password" id="new-password" name="new-password" required>
+                    <span class="error-message" id="new-password-error"></span>
+                </div>
+                <div class="form-group">
+                    <label for="confirm-new-password">Confirm New Password</label>
+                    <input type="password" id="confirm-new-password" name="confirm-new-password" required>
+                    <span class="error-message" id="confirm-new-password-error"></span>
+                </div>
+                <div class="form-actions">
+                    <button type="submit" class="btn btn-primary">Update Password</button>
+                    <button type="button" class="btn btn-outline cancel-password-change">Cancel</button>
+                </div>
+            </form>
+        </div>
+    </div>
+
+    <!-- Backdrop for modals -->
+    <div class="modal-backdrop" id="modal-backdrop"></div>
+
+    <script src="./js/utils.js"></script>
+    <script src="./js/theme.js"></script>
+    <script src="./js/export.js"></script>
+    <script src="./js/profile.js"></script>
+    
+    <!-- Add script for dropdown toggle functionality -->
+    <script>
+        document.addEventListener('DOMContentLoaded', function() {
+            const shareBtn = document.getElementById('share-btn');
+            const shareDropdown = document.getElementById('share-dropdown');
+            const profileBtn = document.getElementById('profile-btn');
+            const profileDropdown = document.getElementById('profile-dropdown');
+            
+            // Toggle dropdown on share button click
+            shareBtn.addEventListener('click', function(e) {
+                e.stopPropagation(); // Prevent the click from reaching document
+                shareDropdown.classList.toggle('active');
+                profileDropdown.classList.remove('active'); // Close other dropdown
+            });
+            
+            // Toggle dropdown on profile button click
+            profileBtn.addEventListener('click', function(e) {
+                e.stopPropagation();
+                profileDropdown.classList.toggle('active');
+                shareDropdown.classList.remove('active'); // Close other dropdown
+            });
+            
+            // Close dropdowns when clicking outside
+            document.addEventListener('click', function() {
+                shareDropdown.classList.remove('active');
+                profileDropdown.classList.remove('active');
+            });
+            
+            // Prevent clicks inside dropdowns from closing them
+            const dropdownMenus = document.querySelectorAll('.dropdown-menu');
+            dropdownMenus.forEach(menu => {
+                menu.addEventListener('click', function(e) {
+                    e.stopPropagation();
+                });
+            });
+
+            // Handle edit profile button
+            const editProfileBtn = document.getElementById('edit-profile-btn');
+            const profileInfoView = document.getElementById('profile-info-view');
+            const profileEditForm = document.getElementById('profile-edit-form');
+            
+            editProfileBtn.addEventListener('click', function() {
+                profileInfoView.style.display = 'none';
+                profileEditForm.style.display = 'block';
+                
+                // Populate form with current values
+                document.getElementById('edit-name').value = document.getElementById('info-name').textContent;
+                document.getElementById('edit-email').value = document.getElementById('info-email').textContent;
+            });
+            
+            // Handle cancel edit button
+            document.getElementById('cancel-edit').addEventListener('click', function() {
+                profileInfoView.style.display = 'block';
+                profileEditForm.style.display = 'none';
+            });
+            
+            // Handle change password button
+            const changePasswordBtn = document.getElementById('change-password-btn');
+            const changePasswordModal = document.getElementById('change-password-modal');
+            const modalBackdrop = document.getElementById('modal-backdrop');
+            
+            changePasswordBtn.addEventListener('click', function() {
+                changePasswordModal.classList.add('show');
+                modalBackdrop.classList.add('show');
+            });
+            
+            // Close modal when clicking on close button
+            document.querySelectorAll('.close-modal, .cancel-password-change').forEach(element => {
+                element.addEventListener('click', function() {
+                    changePasswordModal.classList.remove('show');
+                    modalBackdrop.classList.remove('show');
+                });
+            });
+        });
+    </script>
+</body>
+</html>

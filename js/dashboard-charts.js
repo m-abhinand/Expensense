@@ -426,6 +426,9 @@ function updateCategoryBreakdown() {
         categoryItem.className = 'category-item';
         categoryItem.style.borderLeftColor = chartColors[index % chartColors.length];
         
+        // Add data attribute for the category - this is the key change
+        categoryItem.setAttribute('data-category', category);
+        
         const icon = categoryIcons[category] || '📊';
         
         categoryItem.innerHTML = `
@@ -451,6 +454,9 @@ function updateCategoryBreakdown() {
     if (sortedCategories.length === 0) {
         container.innerHTML = '<p class="empty-state">No expense data to display.</p>';
     }
+    
+    // Dispatch an event to notify that categories have been updated
+    document.dispatchEvent(new Event('categoryBreakdownUpdated'));
 }
 
 // Setup expense filter dropdown

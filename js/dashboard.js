@@ -243,7 +243,7 @@ function updateExpenseListItems(expenseList, expenses, emptyState, noResults, ha
         viewAllBtn.className = 'view-all-expenses';
         viewAllBtn.innerHTML = `View All Expenses <span class="view-all-icon">→</span>`;
         viewAllBtn.addEventListener('click', function() {
-            // Instead of toggling filters, open a popup with all expenses
+            // Call the openExpensesPopup function from expand.js
             openExpensesPopup();
         });
         expenseList.appendChild(viewAllBtn);
