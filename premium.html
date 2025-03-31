@@ -1,0 +1,609 @@
+<!DOCTYPE html>
+<html lang="en" data-theme="light">
+<head>
+    <meta charset="UTF-8">
+    <meta name="viewport" content="width=device-width, initial-scale=1.0">
+    <title>Expense Tracker - Premium Plans</title>
+    <link rel="stylesheet" href="./css/main.css">
+    <link rel="stylesheet" href="./css/dashboard.css">
+    <link rel="stylesheet" href="./css/premium.css">
+    <link rel="preconnect" href="https://fonts.googleapis.com">
+    <link rel="preconnect" href="https://fonts.gstatic.com" crossorigin>
+    <link href="https://fonts.googleapis.com/css2?family=DM+Sans:ital,opsz,wght@0,9..40,100..1000;1,9..40,100..1000&family=Outfit:wght@100..900&display=swap" rel="stylesheet">
+    <!-- Material Symbols for icons -->
+    <link rel="stylesheet" href="https://fonts.googleapis.com/css2?family=Material+Symbols+Outlined:opsz,wght,FILL,GRAD@24,400,0,0" />
+    <style>
+    .material-symbols-outlined {
+      font-variation-settings:
+      'FILL' 0,
+      'wght' 400,
+      'GRAD' 0,
+      'opsz' 24
+    }
+    
+    /* Custom style for icon-only buttons with circular background */
+    .icon-only-btn {
+        background-color: var(--hover-bg);
+        border: none;
+        padding: 8px;
+        cursor: pointer;
+        display: flex;
+        align-items: center;
+        justify-content: center;
+        border-radius: 50%;
+        transition: background-color var(--transition-speed) ease;
+    }
+    
+    .icon-only-btn:hover {
+        background-color: var(--border-color);
+    }
+    
+    /* Dark mode styling enhancements */
+    html[data-theme="dark"] .icon-only-btn {
+        background-color: rgba(255, 255, 255, 0.15);
+    }
+    
+    html[data-theme="dark"] .icon-only-btn:hover {
+        background-color: rgba(255, 255, 255, 0.25);
+    }
+    
+    /* Override the dropdown hover behavior */
+    .dropdown:hover .dropdown-menu {
+        transform: none;
+        opacity: 0;
+        visibility: hidden;
+    }
+    
+    /* Show dropdown only when it has the active class */
+    .dropdown.active .dropdown-menu {
+        transform: scale(1);
+        opacity: 1;
+        visibility: visible;
+        transition: transform var(--transition-speed) ease, 
+                opacity var(--transition-speed) ease, 
+                visibility 0s;
+    }
+    
+    /* Fix navigation sidebar styles */
+    .nav-sidebar {
+        position: fixed;
+        top: 0;
+        left: -280px; /* Start off-screen */
+        width: 280px;
+        height: 100vh;
+        background-color: var(--bg-card);
+        z-index: 1010;
+        box-shadow: 2px 0 10px rgba(0, 0, 0, 0.1);
+        transition: left 0.3s ease;
+        padding-top: 60px;
+    }
+    
+    .nav-sidebar.active {
+        left: 0;
+    }
+    
+    .nav-sidebar .close-nav {
+        position: absolute;
+        top: 15px;
+        right: 15px;
+        background: none;
+        border: none;
+        font-size: 20px;
+        cursor: pointer;
+        color: var(--text-color);
+    }
+    
+    .nav-menu {
+        list-style: none;
+        padding: 0;
+        margin: 0;
+    }
+    
+    .nav-menu li {
+        margin-bottom: 5px;
+    }
+    
+    .nav-menu a {
+        display: flex;
+        align-items: center;
+        padding: 12px 20px;
+        color: var(--text-color);
+        text-decoration: none;
+        transition: background-color 0.2s ease;
+        font-weight: 500;
+    }
+    
+    .nav-menu a:hover {
+        background-color: var(--hover-bg);
+    }
+    
+    .nav-menu a.active {
+        background-color: var(--primary-color);
+        color: white;
+    }
+    
+    .nav-menu .icon {
+        margin-right: 10px;
+        font-size: 20px;
+    }
+    
+    .nav-overlay {
+        position: fixed;
+        top: 0;
+        left: 0;
+        width: 100%;
+        height: 100%;
+        background-color: rgba(0, 0, 0, 0.5);
+        z-index: 1005;
+        display: none;
+    }
+    
+    .nav-overlay.active {
+        display: block;
+    }
+    
+    /* Menu toggle button styling */
+    .menu-toggle {
+        background: none;
+        border: none;
+        cursor: pointer;
+        padding: 5px;
+        color: var(--text-color);
+        display: flex;
+        align-items: center;
+        justify-content: center;
+        width: 40px;
+        height: 40px;
+        line-height: 1;
+    }
+    
+    .menu-toggle .material-symbols-outlined {
+        font-size: 24px;
+        display: flex;
+        align-items: center;
+        justify-content: center;
+    }
+    
+    .menu-toggle:hover {
+        color: var(--primary-color);
+    }
+    
+    /* Navbar left styling for alignment */
+    .navbar-left {
+        display: flex;
+        align-items: center;
+        gap: 15px;
+    }
+    </style>
+</head>
+<body>
+    <header>
+        <div class="container">
+            <div class="navbar-left">
+                <button id="menu-toggle" class="menu-toggle" title="Toggle Menu">
+                    <span class="material-symbols-outlined">menu</span>
+                </button>
+                <h1>Expensense</h1>
+            </div>
+            <div class="user-info">
+                <button id="theme-toggle" class="theme-toggle" title="Toggle Dark Mode">
+                    <span id="theme-icon">🌙</span>
+                </button>
+                <div class="user-actions">
+                    <!-- Share dropdown with icon-only button -->
+                    <div class="dropdown" id="share-dropdown">
+                        <button class="icon-only-btn" title="Share" id="share-btn">
+                            <span class="material-symbols-outlined">ios_share</span>
+                        </button>
+                        <div class="dropdown-menu">
+                            <button id="export-csv" class="dropdown-item">
+                                <span class="icon">📄</span> Export to CSV
+                            </button>
+                            <button id="export-pdf" class="dropdown-item">
+                                <span class="icon">📑</span> Export to PDF
+                            </button>
+                        </div>
+                    </div>
+                    <!-- Profile dropdown -->
+                    <div class="dropdown" id="profile-dropdown">
+                        <button class="icon-only-btn" title="Profile" id="profile-btn">
+                            <span class="material-symbols-outlined">face</span>
+                        </button>
+                        <div class="dropdown-menu">
+                            <a href="profile.html" class="dropdown-item">
+                                <span class="icon">👤</span> <span id="user-name">User</span>
+                            </a>
+                            <div class="dropdown-divider"></div>
+                            <button id="logout-btn" class="dropdown-item">
+                                <span class="icon">🚪</span> Logout
+                            </button>
+                            <div class="dropdown-divider"></div>
+                            <button id="reset-data" class="dropdown-item danger">
+                                <span class="icon">🗑️</span> Reset Data
+                            </button>
+                        </div>
+                    </div>
+                </div>
+            </div>
+        </div>
+    </header>
+    
+    <!-- Navigation Sidebar -->
+    <div class="nav-sidebar" id="nav-sidebar">
+        <button class="close-nav" id="close-nav">&times;</button>
+        <ul class="nav-menu">
+            <li>
+                <a href="dashboard.html">
+                    <span class="icon">📊</span> Dashboard
+                </a>
+            </li>
+            <li>
+                <a href="bills.html">
+                    <span class="icon">📅</span> Bills & Recurring
+                </a>
+            </li>
+            <li>
+                <a href="profile.html">
+                    <span class="icon">👤</span> Profile
+                </a>
+            </li>
+            <li>
+                <a href="premium.html" class="active">
+                    <span class="icon">⭐</span> Premium Plans
+                </a>
+            </li>
+        </ul>
+    </div>
+    
+    <!-- Navigation Overlay -->
+    <div class="nav-overlay" id="nav-overlay"></div>
+    
+    <main class="container">
+        <div class="premium-header">
+            <h2>Premium Plans</h2>
+            <p>Upgrade your account to unlock powerful features with a simple one-time payment</p>
+        </div>
+        
+        <div class="plans-container">
+            <!-- Free Plan -->
+            <div class="plan-card">
+                <div class="plan-header">
+                    <h3>Free</h3>
+                    <div class="plan-price">
+                        <span class="price-value">$0</span>
+                        <span class="price-period">forever</span>
+                    </div>
+                </div>
+                <div class="plan-features">
+                    <ul>
+                        <li>✅ Track unlimited expenses</li>
+                        <li>✅ Basic expense reports</li>
+                        <li>✅ Monthly and weekly budgets</li>
+                        <li>✅ Export to CSV</li>
+                        <li>❌ Advanced analytics</li>
+                        <li>❌ Custom categories</li>
+                        <li>❌ Recurring expenses</li>
+                        <li>❌ Bill reminders</li>
+                        <li>❌ Email reports</li>
+                    </ul>
+                </div>
+                <div class="plan-action">
+                    <button class="btn btn-outline">Current Plan</button>
+                </div>
+            </div>
+            
+            <!-- Plus Plan -->
+            <div class="plan-card popular">
+                <div class="popular-badge">Most Popular</div>
+                <div class="plan-header">
+                    <h3>Plus</h3>
+                    <div class="plan-price">
+                        <span class="price-value" data-price="49.99">$49.99</span>
+                        <span class="price-period">one-time</span>
+                    </div>
+                </div>
+                <div class="plan-features">
+                    <ul>
+                        <li>✅ All Free features</li>
+                        <li>✅ Advanced analytics</li>
+                        <li>✅ Custom categories</li>
+                        <li>✅ Recurring expenses</li>
+                        <li>✅ Bill reminders</li>
+                        <li>❌ Email reports</li>
+                        <li>❌ Financial goal setting</li>
+                        <li>❌ Investment tracking</li>
+                        <li>❌ Priority support</li>
+                    </ul>
+                </div>
+                <div class="plan-action">
+                    <button class="btn btn-primary">Upgrade Now</button>
+                </div>
+            </div>
+            
+            <!-- Pro Plan -->
+            <div class="plan-card">
+                <div class="plan-header">
+                    <h3>Pro</h3>
+                    <div class="plan-price">
+                        <span class="price-value" data-price="99.99">$99.99</span>
+                        <span class="price-period">one-time</span>
+                    </div>
+                </div>
+                <div class="plan-features">
+                    <ul>
+                        <li>✅ All Plus features</li>
+                        <li>✅ Email reports</li>
+                        <li>✅ Financial goal setting</li>
+                        <li>✅ Investment tracking</li>
+                        <li>✅ Priority support</li>
+                        <li>✅ Family accounts (up to 5)</li>
+                        <li>✅ Advanced data export (PDF, Excel)</li>
+                        <li>✅ Personalized financial tips</li>
+                        <li>✅ API access</li>
+                    </ul>
+                </div>
+                <div class="plan-action">
+                    <button class="btn btn-primary">Upgrade Now</button>
+                </div>
+            </div>
+        </div>
+        
+        <div class="features-section">
+            <h2>Premium Features</h2>
+            
+            <div class="features-grid">
+                <div class="feature-card">
+                    <div class="feature-icon">📊</div>
+                    <h3>Advanced Analytics</h3>
+                    <p>Gain deeper insights into your spending patterns with detailed charts and trend analysis.</p>
+                </div>
+                
+                <div class="feature-card">
+                    <div class="feature-icon">🔄</div>
+                    <h3>Recurring Expenses</h3>
+                    <p>Automatically track your subscriptions and recurring bills to avoid surprises.</p>
+                </div>
+                
+                <div class="feature-card">
+                    <div class="feature-icon">🔔</div>
+                    <h3>Bill Reminders</h3>
+                    <p>Never miss a payment with customizable reminders for upcoming bills.</p>
+                </div>
+                
+                <div class="feature-card">
+                    <div class="feature-icon">📱</div>
+                    <h3>Multi-device Sync</h3>
+                    <p>Keep your financial data synchronized across all your devices.</p>
+                </div>
+                
+                <div class="feature-card">
+                    <div class="feature-icon">📈</div>
+                    <h3>Investment Tracking</h3>
+                    <p>Monitor your investments and track portfolio performance over time.</p>
+                </div>
+                
+                <div class="feature-card">
+                    <div class="feature-icon">👨‍👩‍👧‍👦</div>
+                    <h3>Family Accounts</h3>
+                    <p>Share and manage finances together with your family members.</p>
+                </div>
+            </div>
+        </div>
+        
+        <div class="faq-section">
+            <h2>Frequently Asked Questions</h2>
+            
+            <div class="faq-item">
+                <div class="faq-question">
+                    <h3>How do I upgrade to a premium plan?</h3>
+                    <span class="faq-toggle">+</span>
+                </div>
+                <div class="faq-answer">
+                    <p>Simply click on the "Upgrade Now" button next to your desired plan. You'll be guided through a secure checkout process to complete your one-time payment.</p>
+                </div>
+            </div>
+            
+            <div class="faq-item">
+                <div class="faq-question">
+                    <h3>Is this a subscription or one-time payment?</h3>
+                    <span class="faq-toggle">+</span>
+                </div>
+                <div class="faq-answer">
+                    <p>All our premium plans are one-time payments. Once you purchase a plan, you'll have lifetime access to all the features included in that plan.</p>
+                </div>
+            </div>
+            
+            <div class="faq-item">
+                <div class="faq-question">
+                    <h3>Can I upgrade to a higher tier later?</h3>
+                    <span class="faq-toggle">+</span>
+                </div>
+                <div class="faq-answer">
+                    <p>Yes, you can upgrade from Plus to Pro at any time. You'll only need to pay the difference between the two plans.</p>
+                </div>
+            </div>
+            
+            <div class="faq-item">
+                <div class="faq-question">
+                    <h3>How secure is my payment information?</h3>
+                    <span class="faq-toggle">+</span>
+                </div>
+                <div class="faq-answer">
+                    <p>All payments are processed through secure payment gateways that use industry-standard encryption. We never store your full credit card details on our servers.</p>
+                </div>
+            </div>
+        </div>
+    </main>
+
+    <!-- Add the backdrop for modals -->
+    <div class="modal-backdrop" id="modal-backdrop"></div>
+
+    <script src="./js/utils.js"></script>
+    <script src="./js/theme.js"></script>
+    <script src="./js/export.js"></script>
+    
+    <script>
+        document.addEventListener('DOMContentLoaded', function() {
+            // Check if user is logged in
+            requireAuth();
+            
+            // Load user's name
+            const currentUser = JSON.parse(localStorage.getItem('currentUser'));
+            if (currentUser) {
+                const displayName = currentUser.fullname || currentUser.name || currentUser.email;
+                document.getElementById('user-name').textContent = displayName;
+            }
+            
+            // Get the saved currency from dashboard
+            const savedCurrency = localStorage.getItem('userCurrency') || 'USD';
+            
+            // Update prices based on the saved currency
+            updatePricesDisplay(savedCurrency);
+            
+            // Initialize FAQ toggles
+            const faqItems = document.querySelectorAll('.faq-item');
+            faqItems.forEach(item => {
+                const question = item.querySelector('.faq-question');
+                question.addEventListener('click', function() {
+                    const answer = item.querySelector('.faq-answer');
+                    const toggle = question.querySelector('.faq-toggle');
+                    
+                    // Toggle this FAQ item
+                    answer.classList.toggle('active');
+                    toggle.textContent = answer.classList.contains('active') ? '−' : '+';
+                    
+                    // Close other FAQ items
+                    faqItems.forEach(otherItem => {
+                        if (otherItem !== item) {
+                            const otherAnswer = otherItem.querySelector('.faq-answer');
+                            const otherToggle = otherItem.querySelector('.faq-toggle');
+                            otherAnswer.classList.remove('active');
+                            otherToggle.textContent = '+';
+                        }
+                    });
+                });
+            });
+            
+            // Dropdown toggle functionality
+            const shareBtn = document.getElementById('share-btn');
+            const shareDropdown = document.getElementById('share-dropdown');
+            const profileBtn = document.getElementById('profile-btn');
+            const profileDropdown = document.getElementById('profile-dropdown');
+            
+            // Toggle dropdown on share button click
+            shareBtn.addEventListener('click', function(e) {
+                e.stopPropagation();
+                shareDropdown.classList.toggle('active');
+                profileDropdown.classList.remove('active');
+            });
+            
+            // Toggle dropdown on profile button click
+            profileBtn.addEventListener('click', function(e) {
+                e.stopPropagation();
+                profileDropdown.classList.toggle('active');
+                shareDropdown.classList.remove('active');
+            });
+            
+            // Close dropdowns when clicking outside
+            document.addEventListener('click', function() {
+                shareDropdown.classList.remove('active');
+                profileDropdown.classList.remove('active');
+            });
+            
+            // Prevent clicks inside dropdowns from closing them
+            const dropdownMenus = document.querySelectorAll('.dropdown-menu');
+            dropdownMenus.forEach(menu => {
+                menu.addEventListener('click', function(e) {
+                    e.stopPropagation();
+                });
+            });
+            
+            // Navigation functionality
+            const menuToggle = document.getElementById('menu-toggle');
+            const navSidebar = document.getElementById('nav-sidebar');
+            const closeNav = document.getElementById('close-nav');
+            const navOverlay = document.getElementById('nav-overlay');
+            
+            // Open navigation
+            menuToggle.addEventListener('click', function() {
+                navSidebar.classList.add('active');
+                navOverlay.classList.add('active');
+                document.body.style.overflow = 'hidden';
+            });
+            
+            // Close navigation
+            function closeNavigation() {
+                navSidebar.classList.remove('active');
+                navOverlay.classList.remove('active');
+                document.body.style.overflow = '';
+            }
+            
+            closeNav.addEventListener('click', closeNavigation);
+            navOverlay.addEventListener('click', closeNavigation);
+            
+            // Initialize export functionality
+            if (typeof initializeExport === 'function') {
+                initializeExport();
+            }
+            
+            // Initialize reset functionality
+            if (typeof initializeReset === 'function') {
+                initializeReset();
+            }
+        });
+        
+        // Currency Functions
+        function updatePricesDisplay(currencyCode) {
+            const exchangeRates = {
+                'USD': 1,
+                'EUR': 0.91,
+                'GBP': 0.79,
+                'INR': 83.11,
+                'JPY': 150.59,
+                'CAD': 1.36,
+                'AUD': 1.51,
+                'CHF': 0.89
+            };
+            
+            const currencySymbols = {
+                'USD': '$',
+                'EUR': '€',
+                'GBP': '£',
+                'INR': '₹',
+                'JPY': '¥',
+                'CAD': 'C$',
+                'AUD': 'A$',
+                'CHF': 'Fr'
+            };
+            
+            // Update currency display in the form
+            const currencyInputIcon = document.querySelector('.input-icon');
+            if (currencyInputIcon) {
+                currencyInputIcon.textContent = currencySymbols[currencyCode] || '$';
+            }
+            
+            const priceElements = document.querySelectorAll('.price-value[data-price]');
+            
+            priceElements.forEach(element => {
+                const basePrice = parseFloat(element.getAttribute('data-price'));
+                const convertedPrice = basePrice * exchangeRates[currencyCode];
+                
+                let formattedPrice = '';
+                
+                // Format based on currency
+                if (currencyCode === 'JPY') {
+                    // JPY doesn't use decimal points
+                    formattedPrice = Math.round(convertedPrice);
+                } else {
+                    formattedPrice = convertedPrice.toFixed(2);
+                }
+                
+                // Update the price display
+                element.textContent = currencySymbols[currencyCode] + formattedPrice;
+            });
+        }
+        
+        // Remove initCurrencySelector function as we're not using the FAB anymore
+    </script>
+</body>
+</html>

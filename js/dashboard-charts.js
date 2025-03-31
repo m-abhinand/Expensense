@@ -319,7 +319,8 @@ function initTrendChart() {
                 beginAtZero: true,
                 ticks: {
                     callback: function(value) {
-                        return '$' + value;
+                        // Extract currency symbol from the formatted currency string
+                        return formatCurrency(value).replace(/[0-9.,]/g, '').trim() + value;
                     },
                     color: themeOptions.color
                 },
@@ -550,3 +551,28 @@ function updateCharts() {
 
 // Add event listener to update charts when expenses change
 document.addEventListener('expensesUpdated', updateCharts);
+
+// Add event listener to update charts when theme changes
+document.addEventListener('themeChanged', function(e) {
+    if (window.categoryChart) {
+        const isDarkMode = e.detail.theme === 'dark';
+        const textColor = isDarkMode ? '#e1e1e1' : '#333333';
+        
+        window.categoryChart.options.plugins.legend.labels.color = textColor;
+        window.categoryChart.update();
+    }
+    
+    if (window.trendChart) {
+        const isDarkMode = e.detail.theme === 'dark';
+        const textColor = isDarkMode ? '#e1e1e1' : '#333333';
+        const gridColor = isDarkMode ? '#444444' : '#dddddd';
+        
+        window.trendChart.options.scales.y.ticks.color = textColor;
+        window.trendChart.options.scales.y.grid.color = gridColor;
+        window.trendChart.options.scales.x.ticks.color = textColor;
+        window.trendChart.options.scales.x.grid.color = gridColor;
+        window.trendChart.options.plugins.legend.labels.color = textColor;
+        
+        window.trendChart.update();
+    }
+});

@@ -125,7 +125,7 @@
         opacity: 0;
         visibility: hidden;
         transition: transform var(--transition-speed) ease, 
-                    opacity var(--transition-speed) ease, 
+                    opacity var (--transition-speed) ease, 
                     visibility 0s linear var(--transition-speed),
                     background-color var(--transition-speed) ease;
     }
@@ -173,12 +173,128 @@
     .icon {
         font-size: 16px;
     }
+    
+    /* Menu toggle button styling */
+    .menu-toggle {
+        background: none;
+        border: none;
+        cursor: pointer;
+        padding: 5px;
+        color: var(--text-color);
+        display: flex;
+        align-items: center;
+        justify-content: center;
+        width: 40px;
+        height: 40px;
+        line-height: 1;
+    }
+    
+    .menu-toggle .material-symbols-outlined {
+        font-size: 24px;
+        display: flex;
+        align-items: center;
+        justify-content: center;
+    }
+    
+    .menu-toggle:hover {
+        color: var(--primary-color);
+    }
+    
+    /* Navbar left styling for alignment */
+    .navbar-left {
+        display: flex;
+        align-items: center;
+        gap: 15px;
+    }
+    
+    /* Navigation sidebar styles */
+    .nav-sidebar {
+        position: fixed;
+        top: 0;
+        left: -280px; /* Start off-screen */
+        width: 280px;
+        height: 100vh;
+        background-color: var(--bg-card);
+        z-index: 1010;
+        box-shadow: 2px 0 10px rgba(0, 0, 0, 0.1);
+        transition: left 0.3s ease;
+        padding-top: 60px;
+    }
+    
+    .nav-sidebar.active {
+        left: 0;
+    }
+    
+    .nav-sidebar .close-nav {
+        position: absolute;
+        top: 15px;
+        right: 15px;
+        background: none;
+        border: none;
+        font-size: 20px;
+        cursor: pointer;
+        color: var(--text-color);
+    }
+    
+    .nav-menu {
+        list-style: none;
+        padding: 0;
+        margin: 0;
+    }
+    
+    .nav-menu li {
+        margin-bottom: 5px;
+    }
+    
+    .nav-menu a {
+        display: flex;
+        align-items: center;
+        padding: 12px 20px;
+        color: var(--text-color);
+        text-decoration: none;
+        transition: background-color 0.2s ease;
+        font-weight: 500;
+    }
+    
+    .nav-menu a:hover {
+        background-color: var(--hover-bg);
+    }
+    
+    .nav-menu a.active {
+        background-color: var(--primary-color);
+        color: white;
+    }
+    
+    .nav-menu .icon {
+        margin-right: 10px;
+        font-size: 20px;
+    }
+    
+    .nav-overlay {
+        position: fixed;
+        top: 0;
+        left: 0;
+        width: 100%;
+        height: 100%;
+        background-color: rgba(0, 0, 0, 0.5);
+        z-index: 1005;
+        display: none;
+    }
+    
+    .nav-overlay.active {
+        display: block;
+    }
     </style>
 </head>
 <body>
     <header>
         <div class="container">
-            <h1>Expensense</h1>
+            <div class="navbar-left">
+                <button id="menu-toggle" class="menu-toggle" title="Toggle Menu">
+                    <span class="material-symbols-outlined">menu</span>
+                </button>
+                <h1>Expensense</h1>
+            </div>
             <div class="user-info">
                 <button id="theme-toggle" class="theme-toggle" title="Toggle Dark Mode">
                     <span id="theme-icon">🌙</span>
@@ -221,6 +337,36 @@
             </div>
         </div>
     </header>
+    
+    <!-- Navigation Sidebar -->
+    <div class="nav-sidebar" id="nav-sidebar">
+        <button class="close-nav" id="close-nav">&times;</button>
+        <ul class="nav-menu">
+            <li>
+                <a href="dashboard.html">
+                    <span class="icon">📊</span> Dashboard
+                </a>
+            </li>
+            <li>
+                <a href="bills.html">
+                    <span class="icon">📅</span> Bills & Recurring
+                </a>
+            </li>
+            <li>
+                <a href="profile.html" class="active">
+                    <span class="icon">👤</span> Profile
+                </a>
+            </li>
+            <li>
+                <a href="premium.html">
+                    <span class="icon">⭐</span> Premium Plans
+                </a>
+            </li>
+        </ul>
+    </div>
+    
+    <!-- Navigation Overlay -->
+    <div class="nav-overlay" id="nav-overlay"></div>
 
     <main class="container">
         <div class="back-to-dashboard">
@@ -229,7 +375,7 @@
                 Back to Dashboard
             </a>
         </div>
-
+        
         <div class="profile-container">
             <div class="profile-header card">
                 <div class="profile-avatar">
@@ -246,7 +392,7 @@
                     </button>
                 </div>
             </div>
-
+            
             <div class="profile-body">
                 <div class="profile-section card">
                     <h3>Personal Information</h3>
@@ -264,7 +410,7 @@
                             <div class="profile-info-value" id="info-joined">January 1, 2023</div>
                         </div>
                     </div>
-
+                    
                     <form class="profile-edit-form" id="profile-edit-form" style="display: none;">
                         <div class="form-group">
                             <label for="edit-name">Full Name</label>
@@ -280,7 +426,7 @@
                         </div>
                     </form>
                 </div>
-
+                
                 <div class="profile-section card">
                     <h3>Account Settings</h3>
                     <div class="account-settings">
@@ -291,6 +437,7 @@
                             </div>
                             <button id="change-password-btn" class="btn btn-outline">Change Password</button>
                         </div>
+                        
                         <div class="setting-row">
                             <div class="setting-info">
                                 <h4>Default Currency</h4>
@@ -308,7 +455,7 @@
                         </div>
                     </div>
                 </div>
-
+                
                 <div class="profile-section card">
                     <h3>Your Statistics</h3>
                     <div class="stats-container">
@@ -333,11 +480,11 @@
             </div>
         </div>
     </main>
-
+    
     <!-- Change Password Modal -->
     <div class="modal" id="change-password-modal">
         <div class="modal-content">
-            <div class="modal-header"></div>
+            <div class="modal-header">
                 <h3>Change Password</h3>
                 <button class="close-modal">&times;</button>
             </div>
@@ -364,7 +511,7 @@
             </form>
         </div>
     </div>
-
+    
     <!-- Backdrop for modals -->
     <div class="modal-backdrop" id="modal-backdrop"></div>
 
@@ -373,7 +520,7 @@
     <script src="./js/export.js"></script>
     <script src="./js/profile.js"></script>
     
-    <!-- Add script for dropdown toggle functionality -->
+    <!-- Add script for dropdown toggle and navigation functionality -->
     <script>
         document.addEventListener('DOMContentLoaded', function() {
             const shareBtn = document.getElementById('share-btn');
@@ -408,7 +555,7 @@
                     e.stopPropagation();
                 });
             });
-
+            
             // Handle edit profile button
             const editProfileBtn = document.getElementById('edit-profile-btn');
             const profileInfoView = document.getElementById('profile-info-view');
@@ -417,7 +564,6 @@
             editProfileBtn.addEventListener('click', function() {
                 profileInfoView.style.display = 'none';
                 profileEditForm.style.display = 'block';
-                
                 // Populate form with current values
                 document.getElementById('edit-name').value = document.getElementById('info-name').textContent;
                 document.getElementById('edit-email').value = document.getElementById('info-email').textContent;
@@ -446,6 +592,29 @@
                     modalBackdrop.classList.remove('show');
                 });
             });
+            
+            // Navigation functionality
+            const menuToggle = document.getElementById('menu-toggle');
+            const navSidebar = document.getElementById('nav-sidebar');
+            const closeNav = document.getElementById('close-nav');
+            const navOverlay = document.getElementById('nav-overlay');
+            
+            // Open navigation
+            menuToggle.addEventListener('click', function() {
+                navSidebar.classList.add('active');
+                navOverlay.classList.add('active');
+                document.body.style.overflow = 'hidden'; // Prevent scrolling
+            });
+            
+            // Close navigation
+            function closeNavigation() {
+                navSidebar.classList.remove('active');
+                navOverlay.classList.remove('active');
+                document.body.style.overflow = ''; // Enable scrolling
+            }
+            
+            closeNav.addEventListener('click', closeNavigation);
+            navOverlay.addEventListener('click', closeNavigation);
         });
     </script>
 </body>

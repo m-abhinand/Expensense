@@ -1,0 +1,438 @@
+<!DOCTYPE html>
+<html lang="en" data-theme="light">
+<head>
+    <meta charset="UTF-8">
+    <meta name="viewport" content="width=device-width, initial-scale=1.0">
+    <title>Expense Tracker - Bills & Recurring</title>
+    <link rel="stylesheet" href="./css/main.css">
+    <link rel="stylesheet" href="./css/dashboard.css">
+    <link rel="stylesheet" href="./css/bills.css">
+    <link rel="stylesheet" href="./css/dark-mode-fixes.css">
+    <link rel="preconnect" href="https://fonts.googleapis.com">
+    <link rel="preconnect" href="https://fonts.gstatic.com" crossorigin>
+    <link href="https://fonts.googleapis.com/css2?family=Outfit:wght@400;500;600;700&display=swap" rel="stylesheet">
+    <!-- Material Symbols for icons -->
+    <link rel="stylesheet" href="https://fonts.googleapis.com/css2?family=Material+Symbols+Outlined:opsz,wght,FILL,GRAD@24,400,0,0" />
+</head>
+<body>
+    <header>
+        <div class="container">
+            <div class="navbar-left">
+                <button id="menu-toggle" class="menu-toggle" title="Toggle Menu">
+                    <span class="material-symbols-outlined">menu</span>
+                </button>
+                <h1>Bills & Recurring</h1>
+            </div>
+            <div class="user-info">
+                <button id="theme-toggle" class="theme-toggle" title="Toggle Dark Mode">
+                    <span id="theme-icon">🌙</span>
+                </button>
+                <div class="user-actions">
+                    <div class="dropdown" id="profile-dropdown">
+                        <button class="icon-only-btn" title="Profile" id="profile-btn">
+                            <span class="material-symbols-outlined">face</span>
+                        </button>
+                        <div class="dropdown-menu">
+                            <a href="profile.html" class="dropdown-item">
+                                <span class="icon">👤</span> <span id="user-name">User</span>
+                            </a>
+                            <div class="dropdown-divider"></div>
+                            <button id="logout-btn" class="dropdown-item">
+                                <span class="icon">🚪</span> Logout
+                            </button>
+                        </div>
+                    </div>
+                </div>
+            </div>
+        </div>
+    </header>
+
+    <main class="container">
+        <!-- Summary Section -->
+        <section class="summary-section">
+            <div class="summary-card total-bills-card">
+                <h3>Total Monthly Bills</h3>
+                <div class="summary-amount" id="total-bills">$0.00</div>
+            </div>
+            <div class="summary-card" id="due-this-week-card">
+                <h3>Due This Week</h3>
+                <div class="summary-amount" id="due-this-week">$0.00</div>
+                <div class="expand-indicator" title="Click to view bills due this week">
+                    <i class="expand-icon">▼</i>
+                    <span>View Details</span>
+                </div>
+            </div>
+            <div class="summary-card" id="upcoming-bills-card">
+                <h3>Upcoming Bills</h3>
+                <div class="summary-amount" id="upcoming-bills">$0.00</div>
+                <div class="expand-indicator" title="Click to view upcoming bills">
+                    <i class="expand-icon">▼</i>
+                    <span>View Details</span>
+                </div>
+            </div>
+        </section>
+
+        <!-- Analytics Section -->
+        <section class="bill-analytics-section">
+            <div class="card bill-analytics-card">
+                <div class="analytics-header">
+                    <h2>Payment Analytics</h2>
+                    <div class="analytics-controls">
+                        <select id="analytics-period" class="select-control">
+                            <option value="3">Last 3 Months</option>
+                            <option value="6" selected>Last 6 Months</option>
+                            <option value="12">Last 12 Months</option>
+                        </select>
+                    </div>
+                </div>
+                <div class="analytics-content">
+                    <div class="chart-container">
+                        <canvas id="payment-trend-chart"></canvas>
+                    </div>
+                    <div class="stats-container">
+                        <div class="stats-card">
+                            <div class="stats-icon">📈</div>
+                            <div class="stats-info">
+                                <div class="stats-label">Avg. Monthly</div>
+                                <div class="stats-value" id="avg-monthly">$0.00</div>
+                            </div>
+                        </div>
+                        <div class="stats-card">
+                            <div class="stats-icon">📊</div>
+                            <div class="stats-info">
+                                <div class="stats-label">Highest Category</div>
+                                <div class="stats-value" id="highest-category">-</div>
+                            </div>
+                        </div>
+                        <div class="stats-card">
+                            <div class="stats-icon">⚠️</div>
+                            <div class="stats-info">
+                                <div class="stats-label">Late Payments</div>
+                                <div class="stats-value" id="late-payment-count">0</div>
+                            </div>
+                        </div>
+                    </div>
+                </div>
+            </div>
+        </section>
+
+        <div class="bills-header-controls">
+            <div class="bills-filters">
+                <div class="search-box">
+                    <input type="text" id="bill-search" placeholder="Search bills...">
+                    <button type="button" class="search-clear" id="clear-search">×</button>
+                </div>
+                <div class="filter-dropdown">
+                    <select id="filter-category" class="select-control">
+                        <option value="all">All Categories</option>
+                        <option value="utilities">Utilities</option>
+                        <option value="rent">Rent/Mortgage</option>
+                        <option value="insurance">Insurance</option>
+                        <option value="subscription">Subscription</option>
+                        <option value="phone">Phone/Internet</option>
+                        <option value="other">Other</option>
+                    </select>
+                </div>
+                <div class="filter-dropdown">
+                    <select id="filter-status" class="select-control">
+                        <option value="all">All Status</option>
+                        <option value="pending">Pending</option>
+                        <option value="paid">Paid</option>
+                        <option value="overdue">Overdue</option>
+                    </select>
+                </div>
+                <div class="filter-dropdown">
+                    <select id="sort-bills" class="select-control">
+                        <option value="date-asc">Date (Ascending)</option>
+                        <option value="date-desc" selected>Date (Descending)</option>
+                        <option value="amount-asc">Amount (Ascending)</option>
+                        <option value="amount-desc">Amount (Descending)</option>
+                        <option value="name-asc">Name (A-Z)</option>
+                        <option value="name-desc">Name (Z-A)</option>
+                    </select>
+                </div>
+            </div>
+        </div>
+
+        <div class="bills-layout">
+            <!-- Bills List Section -->
+            <section class="bills-list-container card">
+                <div class="bills-list-header">
+                    <h2>Your Bills</h2>
+                    <div class="bills-controls">
+                        <!-- Button removed from here -->
+                    </div>
+                </div>
+                
+                <div class="bills-list" id="bills-list">
+                    <!-- Will be populated dynamically -->
+                    <div class="empty-state" id="empty-state">
+                        <div class="empty-state-icon">📃</div>
+                        <h3>No Bills Added</h3>
+                        <p>Start by adding your recurring bills and payments.</p>
+                    </div>
+                </div>
+            </section>
+
+            <!-- Calendar + Forecast Section -->
+            <section class="bills-right-section">
+                <!-- Calendar Section -->
+                <div class="bills-calendar card">
+                    <h2>Payment Calendar</h2>
+                    <div class="calendar-container" id="calendar-container">
+                        <!-- Will be populated dynamically -->
+                    </div>
+                </div>
+                
+                <!-- Payment Forecast -->
+                <div class="payment-forecast card">
+                    <div class="forecast-header">
+                        <h2>Payment Forecast</h2>
+                        <div class="forecast-legend">
+                            <span class="legend-item"><span class="legend-color pending"></span>Pending</span>
+                            <span class="legend-item"><span class="legend-color overdue"></span>Overdue</span>
+                        </div>
+                    </div>
+                    <div class="forecast-timeline" id="forecast-timeline">
+                        <!-- Will be populated dynamically -->
+                    </div>
+                </div>
+            </section>
+        </div>
+    </main>
+
+    <!-- Add/Edit Bill Modal -->
+    <div class="modal" id="bill-modal">
+        <div class="modal-content">
+            <div class="modal-header">
+                <h3 id="bill-modal-title">Add New Bill</h3>
+                <button class="close-modal">&times;</button>
+            </div>
+            <form id="bill-form">
+                <input type="hidden" id="bill-id">
+                <div class="form-group">
+                    <label for="bill-name">Bill Name</label>
+                    <input type="text" id="bill-name" name="name" required>
+                </div>
+
+                <div class="form-group">
+                    <label for="bill-amount">Amount</label>
+                    <div class="input-with-icon">
+                        <span class="input-icon">$</span>
+                        <input type="number" id="bill-amount" name="amount" step="0.01" min="0.01" required>
+                    </div>
+                </div>
+
+                <div class="form-group">
+                    <label for="bill-category">Category</label>
+                    <select id="bill-category" name="category" required>
+                        <option value="" disabled selected>Select a category</option>
+                        <option value="utilities">Utilities</option>
+                        <option value="rent">Rent/Mortgage</option>
+                        <option value="insurance">Insurance</option>
+                        <option value="subscription">Subscription</option>
+                        <option value="phone">Phone/Internet</option>
+                        <option value="other">Other</option>
+                    </select>
+                </div>
+
+                <div class="form-group">
+                    <label for="bill-due-date">Due Date</label>
+                    <input type="date" id="bill-due-date" name="dueDate" required>
+                </div>
+
+                <div class="toggle-container">
+                    <label class="toggle-switch">
+                        <input type="checkbox" id="bill-is-recurring" name="isRecurring" checked>
+                        <span class="toggle-slider"></span>
+                    </label>
+                    <span class="toggle-label">Recurring Bill</span>
+                </div>
+
+                <div class="form-group" id="frequency-group">
+                    <label for="bill-frequency">Frequency</label>
+                    <select id="bill-frequency" name="frequency" required>
+                        <option value="monthly">Monthly</option>
+                        <option value="weekly">Weekly</option>
+                        <option value="yearly">Yearly</option>
+                        <option value="quarterly">Quarterly</option>
+                        <option value="biweekly">Bi-weekly</option>
+                    </select>
+                </div>
+
+                <div class="form-group">
+                    <label for="bill-reminder">Reminder</label>
+                    <select id="bill-reminder" name="reminder">
+                        <option value="0">On due date</option>
+                        <option value="1">1 day before</option>
+                        <option value="3">3 days before</option>
+                        <option value="7">1 week before</option>
+                    </select>
+                </div>
+
+                <div class="form-group">
+                    <label for="bill-notes">Notes (Optional)</label>
+                    <textarea id="bill-notes" name="notes" rows="3"></textarea>
+                </div>
+
+                <div class="form-actions">
+                    <button type="button" class="btn btn-outline cancel-bill">Cancel</button>
+                    <button type="submit" class="btn btn-primary">Save Bill</button>
+                </div>
+            </form>
+        </div>
+    </div>
+
+    <!-- Delete Confirmation Modal -->
+    <div class="modal" id="delete-bill-modal">
+        <div class="modal-content">
+            <div class="modal-header">
+                <h3>Delete Bill</h3>
+                <button class="close-modal">&times;</button>
+            </div>
+            <div class="modal-body">
+                <p>Are you sure you want to delete this bill? This action cannot be undone.</p>
+            </div>
+            <div class="modal-footer">
+                <button id="confirm-delete-bill" class="btn btn-danger">Delete</button>
+                <button class="btn btn-outline cancel-delete">Cancel</button>
+            </div>
+        </div>
+    </div>
+
+    <!-- Mark Paid Modal -->
+    <div class="modal" id="mark-paid-modal">
+        <div class="modal-content">
+            <div class="modal-header">
+                <h3>Mark Bill as Paid</h3>
+                <button class="close-modal">&times;</button>
+            </div>
+            <form id="payment-form">
+                <input type="hidden" id="payment-bill-id">
+                <div class="form-group">
+                    <label for="payment-date">Payment Date</label>
+                    <input type="date" id="payment-date" name="paymentDate" required>
+                </div>
+                <div class="form-group">
+                    <label for="payment-amount">Amount Paid</label>
+                    <div class="input-with-icon">
+                        <span class="input-icon">$</span>
+                        <input type="number" id="payment-amount" name="amount" step="0.01" min="0.01" required>
+                    </div>
+                </div>
+                <div class="form-actions">
+                    <button type="button" class="btn btn-outline cancel-payment">Cancel</button>
+                    <button type="submit" class="btn btn-primary">Confirm Payment</button>
+                </div>
+            </form>
+        </div>
+    </div>
+
+    <!-- Bills Details Modal -->
+    <div class="modal" id="bills-details-modal">
+        <div class="modal-content">
+            <div class="modal-header">
+                <h3 id="bills-details-title">Bills Details</h3>
+                <button class="close-modal">&times;</button>
+            </div>
+            <div class="modal-body">
+                <div class="bills-details-container">
+                    <div class="bills-details" id="bills-details-list">
+                        <!-- Will be populated dynamically -->
+                    </div>
+                </div>
+            </div>
+        </div>
+    </div>
+
+    <!-- Bill Reminder Settings Modal -->
+    <div class="modal" id="reminder-settings-modal">
+        <div class="modal-content">
+            <div class="modal-header">
+                <h3>Reminder Settings</h3>
+                <button class="close-modal">&times;</button>
+            </div>
+            <form id="reminder-settings-form">
+                <div class="form-group">
+                    <label for="default-reminder-time">Default Reminder Time</label>
+                    <select id="default-reminder-time" name="defaultReminderTime">
+                        <option value="0">On due date</option>
+                        <option value="1">1 day before</option>
+                        <option value="3" selected>3 days before</option>
+                        <option value="7">1 week before</option>
+                    </select>
+                </div>
+                <div class="form-group">
+                    <label>Notification Preferences</label>
+                    <div class="checkbox-group">
+                        <label class="checkbox-label">
+                            <input type="checkbox" id="email-notifications" name="emailNotifications" checked>
+                            Email Notifications
+                        </label>
+                    </div>
+                    <div class="checkbox-group">
+                        <label class="checkbox-label">
+                            <input type="checkbox" id="browser-notifications" name="browserNotifications" checked>
+                            Browser Notifications
+                        </label>
+                    </div>
+                </div>
+                <div class="form-actions">
+                    <button type="button" class="btn btn-outline cancel-reminder-settings">Cancel</button>
+                    <button type="submit" class="btn btn-primary">Save Settings</button>
+                </div>
+            </form>
+        </div>
+    </div>
+
+    <!-- Backdrop for modals -->
+    <div class="modal-backdrop" id="modal-backdrop"></div>
+
+    <!-- Navigation Sidebar -->
+    <div class="nav-sidebar" id="nav-sidebar">
+        <button class="close-nav" id="close-nav">&times;</button>
+        <ul class="nav-menu">
+            <li>
+                <a href="dashboard.html">
+                    <span class="icon">📊</span> Dashboard
+                </a>
+            </li>
+            <li>
+                <a href="bills.html" class="active">
+                    <span class="icon">📅</span> Bills & Recurring
+                </a>
+            </li>
+            <li>
+                <a href="profile.html">
+                    <span class="icon">👤</span> Profile
+                </a>
+            </li>
+            <li>
+                <a href="premium.html">
+                    <span class="icon">⭐</span> Premium Plans
+                </a>
+            </li>
+        </ul>
+    </div>
+
+    <!-- Navigation Overlay -->
+    <div class="nav-overlay" id="nav-overlay"></div>
+
+    <!-- Floating Add Bill Button -->
+    <button id="add-bill-btn" class="floating-action-btn">
+        <span class="fab-icon">+</span>
+        <span class="fab-text">Add Bill</span>
+    </button>
+
+    <script src="https://cdn.jsdelivr.net/npm/chart.js"></script>
+    <script src="./js/utils.js"></script>
+    <script src="./js/theme.js"></script>
+    <script src="./js/bills.js"></script>
+    <script src="./js/due.js"></script>
+    <script src="./js/upcoming.js"></script>
+    <script src="./js/bill-analytics.js"></script>
+    <script src="./js/bill-filters.js"></script>
+    <script src="./js/bill-forecast.js"></script>
+    <script src="./js/bill-reminders.js"></script>
+</body>
+</html>

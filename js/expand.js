@@ -298,6 +298,21 @@ function openExpensesPopup() {
             font-size: 13px;
             color: var(--text-color);
             transition: border-color 0.2s, box-shadow 0.2s;
+            -webkit-appearance: auto; /* Ensure native appearance on all browsers */
+            appearance: auto;
+        }
+        
+        /* Style for dropdown options to respect dark mode */
+        #popup-advanced-filters .filter-group select option {
+            background-color: var(--bg-input);
+            color: var(--text-color);
+            padding: 8px;
+        }
+        
+        /* Ensure dropdown arrow is visible in dark mode */
+        #popup-advanced-filters .filter-group select::-ms-expand {
+            display: block;
+            color: var(--text-color);
         }
         
         #popup-advanced-filters .filter-group select:focus,

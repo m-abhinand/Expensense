@@ -91,6 +91,131 @@
     .expand-indicator span {
         color: var(--text-secondary);
     }
+    
+    /* Navigation styles */
+    .navbar-left {
+        display: flex;
+        align-items: center;
+        gap: 15px;
+    }
+    
+    .menu-toggle {
+        background: none;
+        border: none;
+        cursor: pointer;
+        padding: 5px;
+        color: var(--text-color);
+        display: flex;
+        align-items: center;
+        justify-content: center;
+        width: 40px;
+        height: 40px;
+        line-height: 1;
+    }
+    
+    .menu-toggle .material-symbols-outlined {
+        font-size: 24px;
+        display: flex;
+        align-items: center;
+        justify-content: center;
+    }
+    
+    .menu-toggle:hover {
+        color: var(--primary-color);
+    }
+    
+    /* Align header elements vertically */
+    header .container {
+        display: flex;
+        align-items: center;
+        justify-content: space-between;
+        height: 60px;
+    }
+    
+    /* Ensure the h1 title is vertically centered */
+    .navbar-left h1 {
+        margin: 0;
+        line-height: 1;
+        display: flex;
+        align-items: center;
+    }
+    
+    .nav-sidebar {
+        position: fixed;
+        top: 0;
+        left: -280px;
+        width: 280px;
+        height: 100vh;
+        background-color: var(--bg-card);
+        z-index: 1010;
+        box-shadow: 2px 0 10px rgba(0, 0, 0, 0.1);
+        transition: left 0.3s ease;
+        padding-top: 60px;
+    }
+    
+    .nav-sidebar.active {
+        left: 0;
+    }
+    
+    .nav-sidebar .close-nav {
+        position: absolute;
+        top: 15px;
+        right: 15px;
+        background: none;
+        border: none;
+        font-size: 20px;
+        cursor: pointer;
+        color: var(--text-color);
+    }
+    
+    .nav-menu {
+        list-style: none;
+        padding: 0;
+        margin: 0;
+    }
+    
+    .nav-menu li {
+        margin-bottom: 5px;
+    }
+    
+    .nav-menu a {
+        display: flex;
+        align-items: center;
+        padding: 12px 20px;
+        color: var(--text-color);
+        text-decoration: none;
+        transition: background-color 0.2s ease;
+        font-weight: 500;
+    }
+    
+    .nav-menu a:hover {
+        background-color: var(--hover-bg);
+    }
+    
+    .nav-menu a.active {
+        background-color: var(--primary-color);
+        color: white;
+    }
+    
+    .nav-menu .icon {
+        margin-right: 10px;
+        font-size: 20px;
+    }
+    
+    .nav-overlay {
+        position: fixed;
+        top: 0;
+        left: 0;
+        width: 100%;
+        height: 100%;
+        background-color: rgba(0, 0, 0, 0.5);
+        z-index: 1005;
+        display: none;
+    }
+    
+    .nav-overlay.active {
+        display: block;
+    }
     </style>
     
     <!-- Add script to fix historical expense view styling -->
@@ -182,7 +307,12 @@
 <body>
     <header>
         <div class="container">
-            <h1>Expensense</h1>
+            <div class="navbar-left">
+                <button id="menu-toggle" class="menu-toggle" title="Toggle Menu">
+                    <span class="material-symbols-outlined">menu</span>
+                </button>
+                <h1>Expensense</h1>
+            </div>
             <div class="user-info">
                 <button id="theme-toggle" class="theme-toggle" title="Toggle Dark Mode">
                     <span id="theme-icon">🌙</span>
@@ -214,10 +344,6 @@
                             <div class="dropdown-divider"></div>
                             <button id="logout-btn" class="dropdown-item">
                                 <span class="icon">🚪</span> Logout
-                            </button>
-                            <div class="dropdown-divider"></div>
-                            <button id="reset-data" class="dropdown-item danger">
-                                <span class="icon">🗑️</span> Reset Data
                             </button>
                         </div>
                     </div>
@@ -430,6 +556,36 @@
             </div>
         </section>
     </main>
+
+    <!-- Navigation Sidebar -->
+    <div class="nav-sidebar" id="nav-sidebar">
+        <button class="close-nav" id="close-nav">&times;</button>
+        <ul class="nav-menu">
+            <li>
+                <a href="dashboard.html" class="active">
+                    <span class="icon">📊</span> Dashboard
+                </a>
+            </li>
+            <li>
+                <a href="bills.html">
+                    <span class="icon">📅</span> Bills & Recurring
+                </a>
+            </li>
+            <li>
+                <a href="profile.html">
+                    <span class="icon">👤</span> Profile
+                </a>
+            </li>
+            <li>
+                <a href="premium.html">
+                    <span class="icon">⭐</span> Premium Plans
+                </a>
+            </li>
+        </ul>
+    </div>
+    
+    <!-- Navigation Overlay -->
+    <div class="nav-overlay" id="nav-overlay"></div>
 
     <!-- Currency Selection FAB -->
     <button id="currency-fab" class="fab currency-fab" title="Change Currency">
@@ -721,6 +877,29 @@
                     e.stopPropagation();
                 });
             });
+            
+            // Navigation functionality
+            const menuToggle = document.getElementById('menu-toggle');
+            const navSidebar = document.getElementById('nav-sidebar');
+            const closeNav = document.getElementById('close-nav');
+            const navOverlay = document.getElementById('nav-overlay');
+            
+            // Open navigation
+            menuToggle.addEventListener('click', function() {
+                navSidebar.classList.add('active');
+                navOverlay.classList.add('active');
+                document.body.style.overflow = 'hidden'; // Prevent scrolling
+            });
+            
+            // Close navigation
+            function closeNavigation() {
+                navSidebar.classList.remove('active');
+                navOverlay.classList.remove('active');
+                document.body.style.overflow = ''; // Enable scrolling
+            }
+            
+            closeNav.addEventListener('click', closeNavigation);
+            navOverlay.addEventListener('click', closeNavigation);
         });
     </script>
 </body>
