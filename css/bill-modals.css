@@ -1,0 +1,69 @@
+/* Mark Paid Modal Specific Styling */
+#payment-form {
+    padding: 20px;
+    background-color: var(--bg-card);
+}
+
+#payment-form .form-group {
+    margin-bottom: 20px;
+}
+
+#payment-form label {
+    display: block;
+    margin-bottom: 8px;
+    font-weight: 500;
+    font-size: 14px;
+    color: var(--text-secondary);
+}
+
+#payment-form input {
+    width: 100%;
+    padding: 12px 15px;
+    border: 1px solid var(--border-color);
+    border-radius: 8px;
+    background-color: var(--bg-card);
+    color: var(--text-color);
+    font-size: 16px;
+    transition: all 0.2s ease;
+}
+
+#payment-form input:focus {
+    border-color: var(--primary-color);
+    box-shadow: 0 0 0 2px rgba(52, 152, 219, 0.2);
+    outline: none;
+}
+
+#payment-form .input-with-icon {
+    position: relative;
+}
+
+#payment-form .input-with-icon .input-icon {
+    position: absolute;
+    left: 15px;
+    top: 50%;
+    transform: translateY(-50%);
+    color: var(--text-secondary);
+    font-weight: 500;
+    min-width: 12px;
+    text-align: center;
+}
+
+#payment-form .input-with-icon input {
+    padding-left: 35px;
+}
+
+#payment-form .form-actions {
+    display: flex;
+    justify-content: flex-end;
+    gap: 10px;
+    margin-top: 25px;
+}
+
+#mark-paid-modal .modal-header {
+    background-color: var(--primary-color);
+    color: white;
+}
+
+#mark-paid-modal .modal-header .close-modal {
+    color: white;
+}

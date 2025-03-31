@@ -7,6 +7,9 @@ document.addEventListener('DOMContentLoaded', function() {
     initBillFilters();
 });
 
+// Current tab filter
+let currentTabFilter = 'all';
+
 // Initialize bill filters
 function initBillFilters() {
     // Set up category filter listener
@@ -27,8 +30,30 @@ function initBillFilters() {
         sortSelect.addEventListener('change', applyFilters);
     }
     
+    // Set up tab filters
+    setupTabFilters();
+    
     // Set up search functionality
     initSearchFunctionality();
+}
+
+// Setup tab filters
+function setupTabFilters() {
+    const tabButtons = document.querySelectorAll('.bills-tab');
+    
+    tabButtons.forEach(button => {
+        button.addEventListener('click', function() {
+            // Update active tab
+            tabButtons.forEach(tab => tab.classList.remove('active'));
+            this.classList.add('active');
+            
+            // Set current tab filter
+            currentTabFilter = this.dataset.tab;
+            
+            // Apply filters
+            applyFilters();
+        });
+    });
 }
 
 // Initialize search functionality
@@ -67,6 +92,13 @@ function applyFilters() {
     
     // Get all bills
     let bills = window.billManager.getAllBills();
+    
+    // Apply tab filter
+    if (currentTabFilter === 'recurring') {
+        bills = bills.filter(bill => bill.isRecurring === true && bill.status !== 'paid');
+    } else if (currentTabFilter === 'onetime') {
+        bills = bills.filter(bill => bill.isRecurring === false);
+    }
     
     // Apply category filter
     const categoryFilter = document.getElementById('filter-category');
@@ -118,8 +150,129 @@ function applyFilters() {
         }
     }
     
-    // Render filtered and sorted bills
-    renderFilteredBills(bills);
+    // If we're in the "all" tab, separate current month and future bills
+    if (currentTabFilter === 'all') {
+        renderBillsWithFutureSection(bills);
+    } else {
+        // Render filtered and sorted bills normally for other tabs
+        renderFilteredBills(bills);
+    }
+}
+
+// Render bills with a collapsible future section (for All Bills tab)
+function renderBillsWithFutureSection(bills) {
+    const billsList = document.getElementById('bills-list');
+    const emptyState = document.getElementById('empty-state');
+    
+    // Clear current list (except empty state)
+    Array.from(billsList.children).forEach(child => {
+        if (!child.id || child.id !== 'empty-state') {
+            child.remove();
+        }
+    });
+    
+    if (bills.length === 0) {
+        emptyState.querySelector('h3').textContent = 'No Bills Added';
+        emptyState.querySelector('p').textContent = 'Start by adding your bills and payments.';
+        emptyState.style.display = 'block';
+        return;
+    }
+    
+    emptyState.style.display = 'none';
+    
+    // Get current month and year
+    const today = new Date();
+    const currentMonth = today.getMonth();
+    const currentYear = today.getFullYear();
+    
+    // Separate current month bills from future bills
+    const currentMonthBills = [];
+    const futureBills = [];
+    
+    bills.forEach(bill => {
+        const dueDate = new Date(bill.dueDate);
+        if (dueDate.getMonth() === currentMonth && dueDate.getFullYear() === currentYear) {
+            currentMonthBills.push(bill);
+        } else if (dueDate > today) {
+            futureBills.push(bill);
+        } else {
+            // Past bills still go into current month view for visibility
+            currentMonthBills.push(bill);
+        }
+    });
+    
+    // Add filter results summary if needed
+    const allBills = window.billManager.getAllBills();
+    if (bills.length < allBills.length) {
+        const summary = document.createElement('div');
+        summary.className = 'filter-results-summary';
+        summary.innerHTML = `
+            <div class="filter-summary">Showing ${bills.length} of ${allBills.length} bills</div>
+            <button id="reset-filters" class="btn btn-sm btn-outline">Reset</button>
+        `;
+        
+        // Add event listener to reset button
+        summary.querySelector('#reset-filters').addEventListener('click', resetFilters);
+        
+        billsList.appendChild(summary);
+    }
+    
+    // Render current month bills
+    currentMonthBills.forEach(bill => {
+        const billElement = createBillElement(bill);
+        billsList.appendChild(billElement);
+    });
+    
+    // Only create future bills section if there are future bills
+    if (futureBills.length > 0) {
+        // Create future bills collapsible section
+        const futureBillsSection = document.createElement('div');
+        futureBillsSection.className = 'future-bills-section';
+        
+        // Create header for future bills section
+        const futureBillsHeader = document.createElement('div');
+        futureBillsHeader.className = 'future-bills-header';
+        futureBillsHeader.innerHTML = `
+            <div class="future-bills-title">
+                <span class="future-bills-icon">📅</span>
+                <span>Future Bills (${futureBills.length})</span>
+            </div>
+            <button class="future-bills-toggle">
+                <span class="toggle-icon">▼</span>
+            </button>
+        `;
+        
+        // Create container for future bills
+        const futureBillsContainer = document.createElement('div');
+        futureBillsContainer.className = 'future-bills-container';
+        futureBillsContainer.style.display = 'none'; // Hidden by default
+        
+        // Add future bills to container
+        futureBills.forEach(bill => {
+            const billElement = createBillElement(bill);
+            futureBillsContainer.appendChild(billElement);
+        });
+        
+        // Add click event to toggle future bills visibility
+        futureBillsHeader.addEventListener('click', () => {
+            const isVisible = futureBillsContainer.style.display !== 'none';
+            futureBillsContainer.style.display = isVisible ? 'none' : 'block';
+            
+            // Update toggle icon
+            const toggleIcon = futureBillsHeader.querySelector('.toggle-icon');
+            toggleIcon.textContent = isVisible ? '▼' : '▲';
+            
+            // Toggle active class for styling
+            futureBillsHeader.classList.toggle('active', !isVisible);
+        });
+        
+        // Append all elements to the section
+        futureBillsSection.appendChild(futureBillsHeader);
+        futureBillsSection.appendChild(futureBillsContainer);
+        
+        // Add the section to the bills list
+        billsList.appendChild(futureBillsSection);
+    }
 }
 
 // Render filtered bills
@@ -134,27 +287,25 @@ function renderFilteredBills(bills) {
         }
     });
     
-    // Show empty state if no bills
     if (bills.length === 0) {
-        // Create a temporary empty state for filtered results
-        const tempEmptyState = document.createElement('div');
-        tempEmptyState.className = 'empty-state';
-        tempEmptyState.innerHTML = `
-            <div class="empty-state-icon">🔍</div>
-            <h3>No Matching Bills</h3>
-            <p>Try changing your filters or search terms.</p>
-            <button id="reset-filters" class="btn btn-primary">Reset Filters</button>
-        `;
+        // Show empty state based on current tab
+        let emptyTitle = 'No Bills Added';
+        let emptyMessage = 'Start by adding your bills and payments.';
         
-        // Add event listener to reset button
-        tempEmptyState.querySelector('#reset-filters').addEventListener('click', resetFilters);
+        if (currentTabFilter === 'recurring') {
+            emptyTitle = 'No Recurring Bills';
+            emptyMessage = 'Recurring bills will appear here once added.';
+        } else if (currentTabFilter === 'onetime') {
+            emptyTitle = 'No One-time Bills';
+            emptyMessage = 'One-time bills will appear here once added.';
+        }
         
-        billsList.appendChild(tempEmptyState);
-        emptyState.style.display = 'none';
+        emptyState.querySelector('h3').textContent = emptyTitle;
+        emptyState.querySelector('p').textContent = emptyMessage;
+        emptyState.style.display = 'block';
         return;
     }
     
-    // Hide empty state
     emptyState.style.display = 'none';
     
     // Add filter results summary

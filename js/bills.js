@@ -121,6 +121,7 @@ class BillManager {
         } catch (err) {
             console.error('Error saving bills:', err);
         }
+        document.dispatchEvent(new Event('billsUpdated'));
     }
 
     addBill(name, amount, category, dueDate, frequency, reminder, notes, isRecurring = true) {
@@ -168,6 +169,35 @@ class BillManager {
 
         bill.payments.push(payment);
         bill.status = 'paid';
+        
+        // Add expense entry for the paid bill
+        if (window.expenseManager) {
+            // Create an expense entry with the bill's category (or 'bills' if no matching category)
+            let expenseCategory = 'other'; // Default category
+            
+            // Map bill categories to expense categories
+            const categoryMap = {
+                'utilities': 'utilities',
+                'rent': 'housing',
+                'insurance': 'other',
+                'subscription': 'entertainment',
+                'phone': 'utilities',
+                'other': 'other'
+            };
+            
+            expenseCategory = categoryMap[bill.category] || 'other';
+            
+            // Add the expense with bill name in notes
+            window.expenseManager.addExpense(
+                parseFloat(amount),
+                expenseCategory,
+                paymentDate,
+                `Payment for bill: ${bill.name}`
+            );
+            
+            // Dispatch event to update dashboard charts and data
+            document.dispatchEvent(new Event('expensesUpdated'));
+        }
         
         // Only create next bill if this is a recurring bill
         if (bill.isRecurring) {
@@ -311,6 +341,11 @@ document.addEventListener('DOMContentLoaded', function() {
     // Create a single global instance of the bill manager
     window.billManager = new BillManager();
     
+    // Initialize expense manager if not already initialized
+    if (!window.expenseManager && typeof ExpenseManager !== 'undefined') {
+        window.expenseManager = new ExpenseManager();
+    }
+    
     // Initialize UI first to ensure event listeners are attached
     initUI();
     
@@ -328,6 +363,15 @@ document.addEventListener('DOMContentLoaded', function() {
 
     // Set default date for payment form
     document.getElementById('payment-date').valueAsDate = new Date();
+    
+    // Add currency change listener to update modals if currency is changed on another page
+    window.addEventListener('storage', function(e) {
+        if (e.key === 'userCurrency') {
+            // Update any open modals with new currency
+            updateCurrencySymbolInModal('#bill-modal');
+            updateCurrencySymbolInModal('#mark-paid-modal');
+        }
+    });
     
     console.log('Bills page initialization complete');
 });
@@ -506,30 +550,38 @@ function updateSummary() {
 
 // Render bills list
 function renderBillsList() {
-    const billsList = document.getElementById('bills-list');
-    const emptyState = document.getElementById('empty-state');
-    const bills = window.billManager.getAllBills();
-    
-    // Clear current list (except empty state)
-    Array.from(billsList.children).forEach(child => {
-        if (!child.id || child.id !== 'empty-state') {
-            child.remove();
+    // Instead of directly rendering bills here, call applyFilters to respect tab selection
+    if (typeof applyFilters === 'function') {
+        applyFilters();
+    } else {
+        // Fallback for direct rendering if applyFilters isn't available
+        const billsList = document.getElementById('bills-list');
+        const emptyState = document.getElementById('empty-state');
+        const bills = window.billManager.getAllBills();
+        
+        // Clear current list (except empty state)
+        Array.from(billsList.children).forEach(child => {
+            if (!child.id || child.id !== 'empty-state') {
+                child.remove();
+            }
+        });
+        
+        if (bills.length === 0) {
+            emptyState.style.display = 'block';
+            return;
         }
-    });
-    
-    if (bills.length === 0) {
-        emptyState.style.display = 'block';
-        return;
+        
+        emptyState.style.display = 'none';
+        
+        // Sort bills by due date (closest first)
+        bills.sort((a, b) => new Date(a.dueDate) - new Date(b.dueDate))
+            .forEach(bill => {
+                const billElement = createBillElement(bill);
+                billsList.appendChild(billElement);
+            });
     }
     
-    emptyState.style.display = 'none';
-    
-    // Sort bills by due date (closest first)
-    bills.sort((a, b) => new Date(a.dueDate) - new Date(b.dueDate))
-        .forEach(bill => {
-            const billElement = createBillElement(bill);
-            billsList.appendChild(billElement);
-        });
+    document.dispatchEvent(new Event('billsUpdated'));
 }
 
 // Create bill element
@@ -537,6 +589,9 @@ function createBillElement(bill) {
     const element = document.createElement('div');
     element.className = 'bill-item';
     element.dataset.id = bill.id;
+    
+    // Add a data attribute for recurring/one-time for potential styling
+    element.dataset.type = bill.isRecurring ? 'recurring' : 'onetime';
     
     // Format date properly
     const dueDate = new Date(bill.dueDate);
@@ -604,16 +659,20 @@ function renderCalendar(date) {
     // Clear container
     calendarContainer.innerHTML = '';
     
+    // Create a new date object to avoid modifying the original date
+    const displayDate = new Date(date.getFullYear(), date.getMonth(), 1);
+    
     // Create calendar header
     const calendarHeader = document.createElement('div');
     calendarHeader.className = 'calendar-header';
     
-    const monthYear = date.toLocaleDateString(undefined, { month: 'long', year: 'numeric' });
+    const monthYear = displayDate.toLocaleDateString(undefined, { month: 'long', year: 'numeric' });
     
     calendarHeader.innerHTML = `
         <h3>${monthYear}</h3>
         <div class="calendar-navigation">
             <button class="btn btn-sm btn-outline prev-month">◀</button>
+            <button class="btn btn-sm btn-outline today-btn">Today</button>
             <button class="btn btn-sm btn-outline next-month">▶</button>
         </div>
     `;
@@ -623,14 +682,29 @@ function renderCalendar(date) {
     // Add event listeners for navigation
     const prevMonthBtn = calendarHeader.querySelector('.prev-month');
     const nextMonthBtn = calendarHeader.querySelector('.next-month');
+    const todayBtn = calendarHeader.querySelector('.today-btn');
     
     prevMonthBtn.addEventListener('click', () => {
-        currentDate.setMonth(currentDate.getMonth() - 1);
+        // Create a new date object, don't modify currentDate directly
+        const newDate = new Date(currentDate);
+        newDate.setMonth(newDate.getMonth() - 1);
+        currentDate = newDate;
         renderCalendar(currentDate);
     });
     
+    todayBtn.addEventListener('click', () => {
+        // Set calendar to current month
+        currentDate = new Date();
+        renderCalendar(currentDate);
+        // Also reset any selected date
+        selectedDate = null;
+    });
+    
     nextMonthBtn.addEventListener('click', () => {
-        currentDate.setMonth(currentDate.getMonth() + 1);
+        // Create a new date object, don't modify currentDate directly
+        const newDate = new Date(currentDate);
+        newDate.setMonth(newDate.getMonth() + 1);
+        currentDate = newDate;
         renderCalendar(currentDate);
     });
     
@@ -684,6 +758,23 @@ function renderCalendar(date) {
         calendarDay.className = 'calendar-day';
         calendarDay.textContent = day;
         calendarDay.dataset.date = formattedDateStr;
+        
+        // Add classes for styling
+        if (dayBills.length > 0) {
+            calendarDay.classList.add('has-bills');
+            calendarDay.dataset.billCount = dayBills.length;
+            calendarDay.title = `${dayBills.length} bill(s) due`;
+            
+            // Check for status - overdue has priority over pending
+            const currentDate = new Date();
+            currentDate.setHours(0, 0, 0, 0);
+            
+            if (dayDate < currentDate) {
+                calendarDay.classList.add('overdue');
+            } else {
+                calendarDay.classList.add('pending');
+            }
+        }
         
         // Add classes for styling
         if (dayBills.length > 0) {
@@ -805,6 +896,9 @@ function openAddBillModal() {
     document.getElementById('bill-is-recurring').checked = true;
     toggleFrequencyOptions(true);
     
+    // Update currency symbol
+    updateCurrencySymbolInModal();
+    
     // Show modal
     modal.classList.add('active');
     modalBackdrop.classList.add('active');
@@ -835,6 +929,9 @@ function openEditBillModal(id) {
     
     // Update frequency options visibility
     toggleFrequencyOptions(bill.isRecurring !== false);
+    
+    // Update currency symbol
+    updateCurrencySymbolInModal();
     
     // Show modal
     modal.classList.add('active');
@@ -868,6 +965,9 @@ function openMarkPaidModal(id) {
     
     // Set payment date to today
     document.getElementById('payment-date').valueAsDate = new Date();
+    
+    // Update currency symbol
+    updateCurrencySymbolInModal('#mark-paid-modal');
     
     modal.classList.add('active');
     modalBackdrop.classList.add('active');
@@ -926,6 +1026,7 @@ function handleBillFormSubmit(event) {
     renderBillsList();
     renderCalendar(currentDate);
     updateSummary();
+    // This event is already triggered via renderBillsList
 }
 
 // Handle payment form submit
@@ -937,7 +1038,7 @@ function handlePaymentFormSubmit(event) {
     const amount = document.getElementById('payment-amount').value;
     
     if (window.billManager.markBillAsPaid(billId, paymentDate, amount)) {
-        showMessage('Payment recorded successfully', 'success');
+        showMessage('Payment recorded successfully and added to expenses', 'success');
     } else {
         showMessage('Failed to record payment', 'error');
     }
@@ -946,6 +1047,7 @@ function handlePaymentFormSubmit(event) {
     renderBillsList();
     renderCalendar(currentDate);
     updateSummary();
+    // This event is already triggered via renderBillsList
 }
 
 // Close all modals
@@ -1037,12 +1139,12 @@ function showMessage(message, type = 'info') {
             
             @keyframes slide-in {
                 from { transform: translateX(100%); opacity: 0; }
-                to { transform: translateX(0); opacity: 1; }
+                to { transform: translateX(0); opacity: 1); }
             }
             
             @keyframes fade-out {
-                from { transform: translateX(0); opacity: 1; }
-                to { transform: translateX(100%); opacity: 0; }
+                from { transform: translateX(0); opacity: 1); }
+                to { transform: translateX(100%); opacity: 0); }
             }
         `;
         document.head.appendChild(style);
@@ -1071,4 +1173,31 @@ function toggleFrequencyOptions(isRecurring) {
     if (frequencyGroup) {
         frequencyGroup.style.display = isRecurring ? 'block' : 'none';
     }
+}
+
+// Update currency symbol in modals
+function updateCurrencySymbolInModal(modalSelector = '#bill-modal') {
+    const currencySymbol = getCurrentCurrencySymbol();
+    const inputIcons = document.querySelectorAll(`${modalSelector} .input-icon`);
+    
+    inputIcons.forEach(icon => {
+        icon.textContent = currencySymbol;
+    });
+}
+
+// Get current currency symbol based on user preference
+function getCurrentCurrencySymbol() {
+    const userCurrency = localStorage.getItem('userCurrency') || 'USD';
+    const currencies = {
+        'USD': '$',
+        'EUR': '€',
+        'GBP': '£',
+        'JPY': '¥',
+        'CAD': '$',
+        'AUD': '$',
+        'INR': '₹',
+        'CNY': '¥'
+    };
+    
+    return currencies[userCurrency] || '$';
 }

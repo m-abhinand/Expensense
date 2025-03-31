@@ -10,6 +10,7 @@
     min-width: 0;
     display: flex;
     flex-direction: column;
+    height: 650px; /* Increased from 500px to 650px */
 }
 
 .bills-calendar {
@@ -28,8 +29,28 @@
 .bills-list {
     padding: 15px;
     flex: 1;
-    overflow-y: auto;
+    overflow-y: auto; /* Enable vertical scrolling */
     min-height: 0; /* Required for proper flex behavior when overflowing */
+    max-height: calc(100% - 60px); /* Account for header height */
+    scrollbar-width: thin; /* For Firefox */
+}
+
+.bills-list::-webkit-scrollbar {
+    width: 8px;
+}
+
+.bills-list::-webkit-scrollbar-track {
+    background: var(--bg-secondary);
+    border-radius: 4px;
+}
+
+.bills-list::-webkit-scrollbar-thumb {
+    background-color: var(--border-color);
+    border-radius: 4px;
+}
+
+.bills-list::-webkit-scrollbar-thumb:hover {
+    background-color: var(--text-secondary);
 }
 
 .bill-item {
@@ -146,6 +167,18 @@
     font-weight: 500;
 }
 
+.calendar-day.has-bills.pending {
+    background-color: #fff3e0; /* Light orange background */
+    border: 2px solid #fb8c00; /* Orange border */
+}
+
+.calendar-day.has-bills.overdue {
+    background-color: #ffebee; /* Light red background */
+    border: 2px solid #e53935; /* Red border */
+    color: #e53935; /* Red text */
+    font-weight: 700;
+}
+
 .calendar-day.today {
     border-color: var(--primary-color);
     font-weight: 600;
@@ -154,6 +187,19 @@
 .calendar-day.selected {
     background-color: var(--primary-color);
     color: white;
+}
+
+.calendar-day.has-bills {
+    border: 2px solid var(--primary-color);
+    box-shadow: 0 2px 5px rgba(0,0,0,0.1);
+}
+
+.calendar-day.has-bills.pending::after {
+    background-color: #fb8c00; /* Orange indicator */
+}
+
+.calendar-day.has-bills.overdue::after {
+    background-color: #e53935; /* Red indicator */
 }
 
 /* Bill status indicators */
@@ -172,7 +218,7 @@
 
 .bill-status.paid {
     background-color: var(--success-color-light);
-    color: var(--success-color);
+    color: var (--success-color);
 }
 
 .bill-status.overdue {
@@ -360,7 +406,7 @@
     margin-bottom: 8px;
     font-weight: 500;
     font-size: 14px;
-    color: var(--text-secondary);
+    color: var (--text-secondary);
 }
 
 #payment-form input {
@@ -431,6 +477,10 @@
     .bills-calendar {
         min-width: 100%;
     }
+    
+    .bills-list-container {
+        height: 550px; /* Increased from 400px to 550px */
+    }
 }
 
 @media (max-width: 768px) {
@@ -442,6 +492,10 @@
     .bill-actions {
         width: 100%;
         justify-content: flex-end;
+    }
+    
+    .bills-list-container {
+        height: 450px; /* Increased from 350px to 450px */
     }
 }
 
@@ -1142,7 +1196,7 @@ input:checked + .toggle-slider:before {
 }
 
 .forecast-bill-amount {
-    color: var(--text-color);
+    color: var (--text-color);
 }
 
 /* Checkbox styles for reminder settings */
@@ -1296,4 +1350,119 @@ input:checked + .toggle-slider:before {
     #bill-modal .form-group:last-of-type {
         grid-column: 1;
     }
+}
+
+/* Bills Tabs Styling */
+.bills-tabs {
+    display: flex;
+    margin-bottom: 15px;
+    border-bottom: 1px solid var(--border-color);
+}
+
+.bills-tab {
+    padding: 10px 15px;
+    background: none;
+    border: none;
+    border-bottom: 3px solid transparent;
+    color: var(--text-color);
+    cursor: pointer;
+    font-size: 14px;
+    font-weight: 500;
+    transition: all 0.2s ease;
+    font-family: 'Outfit', sans-serif;
+}
+
+.bills-tab:hover {
+    color: var(--primary-color);
+}
+
+.bills-tab.active {
+    color: var(--primary-color);
+    border-bottom-color: var(--primary-color);
+}
+
+/* Future Bills Section Styling */
+.future-bills-section {
+    margin-top: 20px;
+    border-top: 1px dashed var(--border-color);
+}
+
+.future-bills-header {
+    display: flex;
+    justify-content: space-between;
+    align-items: center;
+    padding: 12px 15px;
+    margin: 10px 0;
+    background-color: var(--bg-secondary);
+    border-radius: 8px;
+    cursor: pointer;
+    transition: all 0.2s ease;
+}
+
+.future-bills-header:hover {
+    background-color: var(--hover-bg);
+}
+
+.future-bills-header.active {
+    background-color: var(--primary-color-light);
+    color: var(--primary-color);
+}
+
+.future-bills-title {
+    display: flex;
+    align-items: center;
+    gap: 8px;
+    font-weight: 600;
+    font-size: 15px;
+}
+
+.future-bills-icon {
+    font-size: 18px;
+}
+
+.future-bills-toggle {
+    background: none;
+    border: none;
+    color: var(--text-secondary);
+    cursor: pointer;
+    font-size: 12px;
+    transition: transform 0.2s ease;
+}
+
+.future-bills-toggle:hover {
+    color: var(--primary-color);
+}
+
+.future-bills-container {
+    animation: slideDown 0.3s ease-out;
+}
+
+@keyframes slideDown {
+    from { opacity: 0; transform: translateY(-10px); }
+    to { opacity: 1; transform: translateY(0); }
+}
+
+/* Calendar navigation buttons */
+.calendar-navigation button {
+    font-family: 'Outfit', sans-serif;
+    font-weight: 500;
+}
+
+/* Filters styling */
+.bills-filters input,
+.bills-filters select,
+.bills-filters button,
+.search-box input,
+.filter-dropdown select {
+    font-family: 'Outfit', sans-serif;
+}
+
+/* Search box placeholder */
+.search-box input::placeholder {
+    font-family: 'Outfit', sans-serif;
+}
+
+/* Ensure filter dropdowns use consistent font */
+.select-control {
+    font-family: 'Outfit', sans-serif;
 }

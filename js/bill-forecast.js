@@ -13,6 +13,9 @@ function initBillForecast() {
     
     // Update forecast when bills are updated
     document.addEventListener('billsUpdated', renderForecast);
+    
+    // Also listen for when a bill is marked as paid
+    document.addEventListener('expensesUpdated', renderForecast);
 }
 
 // Render payment forecast
@@ -46,6 +49,8 @@ function renderForecast() {
     // Create forecast items for each date
     sortedDates.forEach(dateStr => {
         const dateBills = groupedBills[dateStr];
+        
+        // Parse date properly
         const dueDate = new Date(dateStr);
         
         // Format date
@@ -62,7 +67,7 @@ function renderForecast() {
         forecastItem.className = `forecast-item ${isOverdue ? 'overdue' : 'pending'}`;
         
         // Calculate total for this date
-        const dateTotal = dateBills.reduce((total, bill) => total + bill.amount, 0);
+        const dateTotal = dateBills.reduce((total, bill) => total + parseFloat(bill.amount), 0);
         
         forecastItem.innerHTML = `
             <div class="forecast-date">
@@ -87,11 +92,20 @@ function groupBillsByDate(bills) {
     const groupedBills = {};
     
     bills.forEach(bill => {
-        if (!groupedBills[bill.dueDate]) {
-            groupedBills[bill.dueDate] = [];
+        if (!bill.dueDate) return;
+        
+        // Normalize the date format to YYYY-MM-DD to avoid timezone issues
+        const billDate = new Date(bill.dueDate);
+        const year = billDate.getFullYear();
+        const month = String(billDate.getMonth() + 1).padStart(2, '0');
+        const day = String(billDate.getDate()).padStart(2, '0');
+        const normalizedDateStr = `${year}-${month}-${day}`;
+        
+        if (!groupedBills[normalizedDateStr]) {
+            groupedBills[normalizedDateStr] = [];
         }
         
-        groupedBills[bill.dueDate].push(bill);
+        groupedBills[normalizedDateStr].push(bill);
     });
     
     return groupedBills;
@@ -99,23 +113,20 @@ function groupBillsByDate(bills) {
 
 // Format date with relative time
 function formatDateWithRelative(date) {
+    // Format date
+    const formattedDate = date.toLocaleDateString(undefined, { 
+        month: 'short', 
+        day: 'numeric'
+    });
+    
+    // Calculate days difference
     const today = new Date();
     today.setHours(0, 0, 0, 0);
-    
-    const tomorrow = new Date(today);
-    tomorrow.setDate(today.getDate() + 1);
     
     const diffTime = date.getTime() - today.getTime();
     const diffDays = Math.ceil(diffTime / (1000 * 60 * 60 * 24));
     
-    // Format the date
-    const formattedDate = date.toLocaleDateString(undefined, {
-        month: 'short',
-        day: 'numeric',
-        year: date.getFullYear() !== today.getFullYear() ? 'numeric' : undefined
-    });
-    
-    // Add relative time
+    // Return relative text
     if (diffDays === 0) {
         return `Today (${formattedDate})`;
     } else if (diffDays === 1) {
@@ -127,4 +138,16 @@ function formatDateWithRelative(date) {
     } else {
         return formattedDate;
     }
+}
+
+// Format currency helper function
+function formatCurrency(amount) {
+    // Get the user's preferred currency
+    const userCurrency = localStorage.getItem('userCurrency') || 'USD';
+    
+    // Format the amount with the user's locale and currency
+    return new Intl.NumberFormat(undefined, {
+        style: 'currency',
+        currency: userCurrency
+    }).format(amount);
 }

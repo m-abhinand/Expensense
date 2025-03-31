@@ -7,12 +7,27 @@
     <link rel="stylesheet" href="./css/main.css">
     <link rel="stylesheet" href="./css/dashboard.css">
     <link rel="stylesheet" href="./css/bills.css">
+    <link rel="stylesheet" href="./css/bill-modals.css">
     <link rel="stylesheet" href="./css/dark-mode-fixes.css">
     <link rel="preconnect" href="https://fonts.googleapis.com">
     <link rel="preconnect" href="https://fonts.gstatic.com" crossorigin>
     <link href="https://fonts.googleapis.com/css2?family=Outfit:wght@400;500;600;700&display=swap" rel="stylesheet">
     <!-- Material Symbols for icons -->
     <link rel="stylesheet" href="https://fonts.googleapis.com/css2?family=Material+Symbols+Outlined:opsz,wght,FILL,GRAD@24,400,0,0" />
+    <style>
+        /* Ensure consistent header height with dashboard */
+        header .container {
+            display: flex;
+            justify-content: space-between;
+            align-items: center;
+            height: 60px; /* Set fixed height to match dashboard */
+        }
+
+        /* Apply Outfit font to navigation menu */
+        .nav-menu a {
+            font-family: 'Outfit', sans-serif;
+        }
+    </style>
 </head>
 <body>
     <header>
@@ -162,6 +177,13 @@
                     <div class="bills-controls">
                         <!-- Button removed from here -->
                     </div>
+                </div>
+                
+                <!-- Add tabs for bill types -->
+                <div class="bills-tabs">
+                    <button class="bills-tab active" data-tab="all">All Bills</button>
+                    <button class="bills-tab" data-tab="recurring">Recurring Bills</button>
+                    <button class="bills-tab" data-tab="onetime">One-time Bills</button>
                 </div>
                 
                 <div class="bills-list" id="bills-list">
@@ -427,6 +449,7 @@
     <script src="https://cdn.jsdelivr.net/npm/chart.js"></script>
     <script src="./js/utils.js"></script>
     <script src="./js/theme.js"></script>
+    <script src="./js/expenses.js"></script>
     <script src="./js/bills.js"></script>
     <script src="./js/due.js"></script>
     <script src="./js/upcoming.js"></script>

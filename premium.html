@@ -99,10 +99,6 @@
         margin: 0;
     }
     
-    .nav-menu li {
-        margin-bottom: 5px;
-    }
-    
     .nav-menu a {
         display: flex;
         align-items: center;
@@ -111,6 +107,7 @@
         text-decoration: none;
         transition: background-color 0.2s ease;
         font-weight: 500;
+        font-family: 'Outfit', sans-serif;
     }
     
     .nav-menu a:hover {
@@ -173,6 +170,23 @@
         display: flex;
         align-items: center;
         gap: 15px;
+    }
+    
+    /* Fix alignment of header elements */
+    .navbar-left h1 {
+        margin: 0;
+        font-size: 1.6rem;
+        line-height: 1;
+        display: flex;
+        align-items: center;
+    }
+    
+    /* Ensure consistent header height with dashboard */
+    header .container {
+        display: flex;
+        justify-content: space-between;
+        align-items: center;
+        height: 60px; /* Set fixed height to match dashboard */
     }
     </style>
 </head>
@@ -566,6 +580,9 @@
             };
             
             const currencySymbols = {
+                'USD': '$',
+                'EUR': '€',
+                'GBP': '£',
                 'USD': '$',
                 'EUR': '€',
                 'GBP': '£',
